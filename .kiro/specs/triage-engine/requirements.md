@@ -54,7 +54,7 @@ Requirements tagged **[PBT]** must be covered by a property-based test in `tests
 
 1. WHEN any check has status `poor_quality` and no finding exists THE SYSTEM SHALL return `RETRY_CAPTURE`. **[PBT]**
 2. WHEN any check has status `poor_quality` and a finding exists THE SYSTEM SHALL return `CALL_911_NOW`. **[PBT]**
-3. WHEN any check's status is changed from `ok` to `poor_quality` THE SYSTEM SHALL NOT return a less urgent result than before. **[PBT]**
+3. WHEN any non-flagged check's status is changed from `ok` to `poor_quality` THE SYSTEM SHALL NOT return a less urgent result than before. **[PBT]** (A flagged score lost to a bad capture cannot be known to the engine; criterion 1 governs that case.)
 4. WHEN `RETRY_CAPTURE` is returned THE SYSTEM SHALL identify which checks need to be retried.
 
 ## Requirement 5: Baseline comparison
