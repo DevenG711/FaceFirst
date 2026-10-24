@@ -62,6 +62,7 @@
       "listening": "Ouvindo…",
       "heard": "Ouvimos:",
       "noSpeech": "Não ouvimos nada. Tente de novo ou responda à pergunta abaixo.",
+      "unclear": "Não conseguimos uma gravação clara. Tente de novo ou responda à pergunta abaixo.",
       "micDenied": "Não conseguimos usar o microfone. Responda à pergunta abaixo.",
       "unsupported": "Este navegador não consegue ouvir a fala. Responda à pergunta abaixo.",
       "disclosure": "O reconhecimento de voz do Chrome envia o áudio para os servidores do Google.",

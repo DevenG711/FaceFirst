@@ -62,6 +62,7 @@
       "listening": "Listening…",
       "heard": "We heard:",
       "noSpeech": "We didn't hear anything. Try again, or answer the question below.",
+      "unclear": "We couldn't get a clear recording. Try again, or answer the question below.",
       "micDenied": "We can't use the microphone. Answer the question below instead.",
       "unsupported": "This browser can't listen to speech. Answer the question below instead.",
       "disclosure": "Speech recognition in Chrome sends audio to Google's servers.",

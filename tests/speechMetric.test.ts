@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { speechErrorScore } from '#lib/metrics/speech.ts';
+import { speechAcoustics, speechErrorScore, speechScore } from '#lib/metrics/speech.ts';
+import { ACOUSTIC_PARAMS } from '#lib/triage/thresholds.ts';
 
 describe('speechErrorScore', () => {
   it('is 0 when every word is heard, ignoring case and punctuation', () => {
@@ -21,5 +22,44 @@ describe('speechErrorScore', () => {
   it('matches accented words', () => {
     expect(speechErrorScore('El cielo está azul hoy.', 'el cielo esta azul hoy')).toBeCloseTo(0.2);
     expect(speechErrorScore('O céu está azul hoje.', 'o céu está azul hoje')).toBe(0);
+  });
+});
+
+describe('acoustic proxies: fluent vs. slow, mushy, over-paused', () => {
+  const PHRASE = 'The sky is blue today.';
+  const MS = ACOUSTIC_PARAMS.SAMPLE_MS;
+  const repeat = (word: number[], times: number) => Array.from({ length: times }, () => word).flat();
+
+  // Five quick words: well-modulated syllables, only short dips between words.
+  const fluent = repeat([0.4, 0.15, 0.45, 0.1, 0.35, 0.08, 0], 5);
+  // Same five words: slow, flat loudness, and a long gap after each word.
+  const slurred = repeat([...Array<number>(16).fill(0.2), ...Array<number>(12).fill(0)], 5);
+
+  it('a fluent attempt adds nothing to a perfect word score', () => {
+    expect(speechAcoustics(fluent, MS, 5)!.score).toBe(0);
+    expect(speechScore('the sky is blue today', PHRASE, { audio: { amplitudes: fluent, sampleMs: MS } })).toEqual({
+      id: 'speech',
+      status: 'ok',
+      score: 0,
+      side: null,
+    });
+  });
+
+  it('a slow, mushy, over-paused attempt scores higher, even with every word right', () => {
+    const fluentScore = speechScore('the sky is blue today', PHRASE, { audio: { amplitudes: fluent, sampleMs: MS } });
+    const slurredScore = speechScore('the sky is blue today', PHRASE, { audio: { amplitudes: slurred, sampleMs: MS } });
+    expect(slurredScore.status).toBe('ok');
+    expect(slurredScore.score!).toBeGreaterThan(fluentScore.score!);
+
+    const a = speechAcoustics(slurred, MS, 5)!;
+    expect(a.wordsPerSecond).toBeLessThan(ACOUSTIC_PARAMS.MIN_WORDS_PER_SEC);
+    expect(a.pauseRatio).toBeGreaterThan(ACOUSTIC_PARAMS.MAX_PAUSE_RATIO);
+    expect(a.envelopeCv).toBeLessThan(ACOUSTIC_PARAMS.MIN_ENVELOPE_CV);
+  });
+
+  it('acoustics stack on top of missed words; they never reduce the score', () => {
+    const wordsOnly = speechScore('the sky', PHRASE);
+    const withAudio = speechScore('the sky', PHRASE, { audio: { amplitudes: slurred, sampleMs: MS } });
+    expect(withAudio.score!).toBeGreaterThan(wordsOnly.score!);
   });
 });

@@ -1,16 +1,19 @@
 <!--
-  Speech check. Two inputs, both optional: speech recognition (if the browser has it) and a
-  caregiver judgment. The caregiver answer is an observation fed to the triage engine as a
-  caregiverReport, never a pass/fail (.kiro/steering/safety.md §1). The privacy disclosure
-  is required by safety.md §4.
+  Speech check. The program decides: word accuracy from speech recognition plus acoustic proxies
+  for slurred speech from the microphone's amplitude envelope (lib/metrics/speech.ts). Both can only
+  add a finding. The caregiver judgment buttons are a fallback, shown only when listening failed;
+  a "slurred" answer is a caregiverReport, never a pass/fail (.kiro/steering/safety.md §1).
+  The privacy disclosure is required by safety.md §4. The amplitude envelope is analyzed in the
+  browser and never stored or sent.
 -->
 <script lang="ts">
   import { onMount } from 'svelte';
   import { get } from 'svelte/store';
   import { goto } from '$app/navigation';
   import { t } from '#lib/i18n/index.ts';
-  import { speechErrorScore } from '#lib/metrics/speech.ts';
+  import { rms, speechScore } from '#lib/metrics/speech.ts';
   import { triage } from '#lib/triage/engine.ts';
+  import { ACOUSTIC_PARAMS } from '#lib/triage/thresholds.ts';
   import {
     caregiverReports,
     checks,
@@ -21,6 +24,7 @@
   } from '#lib/stores/session.ts';
   import { speak, VOICE_LANG } from '#lib/voice.ts';
   import FlowProgress from '#lib/components/FlowProgress.svelte';
+
   const JUDGMENTS = ['slurred', 'noChange', 'notSure'] as const;
   type Judgment = (typeof JUDGMENTS)[number];
 
@@ -45,17 +49,64 @@
     return w.SpeechRecognition ?? w.webkitSpeechRecognition;
   };
 
-  let phase = $state<'ready' | 'listening' | 'heard' | 'noSpeech' | 'micDenied' | 'unsupported'>(
-    'ready'
-  );
+  type Phase = 'ready' | 'listening' | 'heard' | 'noSpeech' | 'unclear' | 'micDenied' | 'unsupported';
+  let phase = $state<Phase>('ready');
   let heard = $state('');
   let judgment = $state<Judgment | null>(null);
   let recognition: Recognition | null = null;
 
+  /** Caregiver buttons only when the program could not listen or hear enough. */
+  const showFallback = $derived(
+    phase === 'unsupported' || phase === 'micDenied' || phase === 'noSpeech' || phase === 'unclear'
+  );
+
+  // --- Amplitude capture: RMS of the mic signal every ACOUSTIC_PARAMS.SAMPLE_MS while listening ---
+  let amplitudes: number[] = [];
+  let stopAudio = () => {};
+
+  async function startAudio() {
+    const samples: number[] = [];
+    amplitudes = samples;
+    let stopped = false;
+    let release = () => {};
+    stopAudio = () => {
+      stopped = true;
+      release();
+    };
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (stopped) {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
+      const ctx = new AudioContext();
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 2048;
+      ctx.createMediaStreamSource(stream).connect(analyser);
+      const frame = new Float32Array(analyser.fftSize);
+      const timer = setInterval(() => {
+        analyser.getFloatTimeDomainData(frame);
+        samples.push(rms(frame));
+      }, ACOUSTIC_PARAMS.SAMPLE_MS);
+      release = () => {
+        clearInterval(timer);
+        stream.getTracks().forEach((track) => track.stop());
+        void ctx.close();
+      };
+    } catch {
+      // No amplitude envelope: the word score stands alone. Acoustics could only have added a finding.
+    }
+  }
+
   onMount(() => {
     if (!recognitionCtor()) phase = 'unsupported';
     speak(t($locale, 'check.speech.instructions'), $locale);
-    return () => recognition?.abort();
+    return () => {
+      const rec = recognition;
+      recognition = null; // ignore the abort's events
+      rec?.abort();
+      stopAudio();
+    };
   });
 
   function listen() {
@@ -66,6 +117,7 @@
     }
     speechSynthesis?.cancel();
     recognition?.abort();
+    stopAudio();
 
     const rec = new Ctor();
     recognition = rec;
@@ -75,36 +127,40 @@
 
     // Ignore events from an earlier attempt that is still shutting down.
     const current = () => recognition === rec;
+    let transcript: string | null = null;
 
     rec.onresult = (e) => {
-      if (!current()) return;
-      heard = e.results[0]?.[0]?.transcript ?? '';
-      phase = 'heard';
-      setCheck({
-        id: 'speech',
-        status: 'ok',
-        score: speechErrorScore(t($locale, 'check.speech.phrase'), heard),
-        side: null,
-      });
+      if (current()) transcript = e.results[0]?.[0]?.transcript ?? '';
     };
     rec.onerror = (e) => {
-      if (!current()) return;
-      if (['not-allowed', 'service-not-allowed', 'audio-capture'].includes(e.error)) {
+      if (current() && ['not-allowed', 'service-not-allowed', 'audio-capture'].includes(e.error)) {
         phase = 'micDenied';
-        setCheck(unavailableCheck('speech'));
-      } else if (e.error !== 'aborted') {
-        phase = 'noSpeech';
       }
     };
     rec.onend = () => {
       if (!current()) return;
-      if (phase === 'listening') phase = 'noSpeech';
-      // Nothing usable was heard: ask for a retry rather than treating it as fine.
-      if (phase === 'noSpeech') setCheck({ id: 'speech', status: 'poor_quality', score: null, side: null });
+      stopAudio();
+      finish(transcript);
     };
 
     phase = 'listening';
+    void startAudio();
     rec.start();
+  }
+
+  /** The program's decision: word accuracy + acoustic proxies, one CheckResult for the engine. */
+  function finish(transcript: string | null) {
+    if (phase === 'micDenied') {
+      setCheck(unavailableCheck('speech'));
+      return;
+    }
+    // An attempt was made, so no transcript means "heard nothing" (poor_quality), not "unavailable".
+    const result = speechScore(transcript ?? '', t($locale, 'check.speech.phrase'), {
+      audio: { amplitudes, sampleMs: ACOUSTIC_PARAMS.SAMPLE_MS },
+    });
+    setCheck(result);
+    heard = transcript ?? '';
+    phase = result.status === 'ok' ? 'heard' : transcript ? 'unclear' : 'noSpeech';
   }
 
   function judge(answer: Judgment) {
@@ -153,24 +209,26 @@
     {:else if phase === 'heard'}
       <p>{t($locale, 'check.common.complete')}</p>
       <p>{t($locale, 'check.speech.heard')} “{heard}”</p>
-    {:else if phase === 'noSpeech' || phase === 'micDenied' || phase === 'unsupported'}
+    {:else if phase !== 'ready'}
       <p>{t($locale, `check.speech.${phase}`)}</p>
     {/if}
   </div>
 
-  <fieldset class="caregiver">
-    <legend>{t($locale, 'check.speech.caregiver.question')}</legend>
-    {#each JUDGMENTS as answer (answer)}
-      <button
-        type="button"
-        class="button secondary"
-        aria-pressed={judgment === answer}
-        onclick={() => judge(answer)}
-      >
-        {t($locale, `check.speech.caregiver.${answer}`)}
-      </button>
-    {/each}
-  </fieldset>
+  {#if showFallback}
+    <fieldset class="caregiver">
+      <legend>{t($locale, 'check.speech.caregiver.question')}</legend>
+      {#each JUDGMENTS as answer (answer)}
+        <button
+          type="button"
+          class="button secondary"
+          aria-pressed={judgment === answer}
+          onclick={() => judge(answer)}
+        >
+          {t($locale, `check.speech.caregiver.${answer}`)}
+        </button>
+      {/each}
+    </fieldset>
+  {/if}
 
   <div class="actions">
     <button type="button" class="button secondary" onclick={next}>

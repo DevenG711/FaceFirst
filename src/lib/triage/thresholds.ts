@@ -47,3 +47,37 @@ export const METRIC_PARAMS = {
   /** Fraction of valid arm frames at the start / end that are compared to measure drift. Uncalibrated placeholder. */
   ARM_WINDOW_FRACTION: 0.25,
 } as const;
+
+/**
+ * Acoustic PROXIES for slurred or effortful speech (dysarthria), read from the RMS amplitude envelope.
+ * These are crude, uncalibrated signals, NOT a validated slur detector. They can only ever raise the
+ * speech score (escalate-only). Each sub-score is 0 at its "ok" bound and 1 at its "bad" bound.
+ * UNCALIBRATED placeholders.
+ */
+export const ACOUSTIC_PARAMS = {
+  SAMPLE_MS: 50, // how often the speech route samples RMS amplitude, in ms. Uncalibrated placeholder.
+
+  // Articulation rate: target words per second of voiced (non-silent) time. Slow = suspicious.
+  MIN_WORDS_PER_SEC: 2.0, // at or above this, the rate sub-score is 0. Uncalibrated placeholder.
+  SLOW_WORDS_PER_SEC: 1.0, // at or below this, the rate sub-score is 1. Uncalibrated placeholder.
+
+  // Pauses: share of the speech span (first to last voiced sample) spent in pauses of at least
+  // QUALITY.MIN_PAUSE_MS, and the longest single hesitation. Many or long pauses = suspicious.
+  MAX_PAUSE_RATIO: 0.3, // at or below this pause share, the pause sub-score is 0. Uncalibrated placeholder.
+  HIGH_PAUSE_RATIO: 0.6, // at or above this pause share, the pause sub-score is 1. Uncalibrated placeholder.
+  LONG_PAUSE_MS: 1000, // a single hesitation this long starts to count. Uncalibrated placeholder.
+  VERY_LONG_PAUSE_MS: 2500, // a single hesitation this long gives a pause sub-score of 1. Uncalibrated placeholder.
+
+  // Envelope modulation: coefficient of variation (std / mean) of voiced amplitudes. Flat, under-
+  // modulated ("mushy") speech has a low value. Scale-free, so microphone gain does not matter.
+  MIN_ENVELOPE_CV: 0.4, // at or above this, the envelope sub-score is 0. Uncalibrated placeholder.
+  FLAT_ENVELOPE_CV: 0.15, // at or below this, the envelope sub-score is 1. Uncalibrated placeholder.
+
+  // Weights that average the three sub-scores into one acoustic score in [0, 1].
+  WEIGHT_RATE: 0.4, // Uncalibrated placeholder.
+  WEIGHT_PAUSE: 0.3, // Uncalibrated placeholder.
+  WEIGHT_ENVELOPE: 0.3, // Uncalibrated placeholder.
+
+  /** Final speech score = min(1, word error + ACOUSTIC_WEIGHT × acoustic score). Uncalibrated placeholder. */
+  ACOUSTIC_WEIGHT: 0.5,
+} as const;
