@@ -53,15 +53,28 @@ function drop(ys: readonly number[], k: number): number {
 export function armDrift(frames: readonly (ArmFrameInput | null)[], { mirrored }: ArmOptions): CheckResult {
   const yA: number[] = [];
   const yB: number[] = [];
-  for (const f of frames) {
+  let firstUsable = -1;
+  let lastUsable = -1;
+  for (let i = 0; i < frames.length; i++) {
+    const f = frames[i]!;
     if (!f || !usable(f.shoulder11) || !usable(f.shoulder12) || !usable(f.wrist15) || !usable(f.wrist16)) continue;
     const frame = poseFrame(f.shoulder11, f.shoulder12);
     if (!frame) continue;
+    if (firstUsable === -1) firstUsable = i;
+    lastUsable = i;
     yA.push(normalizePoint(f.wrist16, frame, tmp).y);
     yB.push(normalizePoint(f.wrist15, frame, tmp).y);
   }
   const n = yA.length;
   if (n < QUALITY.MIN_ARM_FRAMES) return poorQuality('arm');
+
+  // Span gate: drift compares the start to the END of the hold, so the usable frames must cover enough
+  // of the capture. If they all bunch into part of it (the subject dropped out of frame for the rest),
+  // the end window is not the end of the hold — retry rather than trust a half-measured drift.
+  if (frames.length > 0) {
+    const span = (lastUsable - firstUsable + 1) / frames.length;
+    if (span < QUALITY.MIN_ARM_FRAME_SPAN) return poorQuality('arm');
+  }
 
   // Windows never overlap, so a wrist that keeps sinking can only raise its drift.
   const k = Math.max(1, Math.min(Math.floor(n * METRIC_PARAMS.ARM_WINDOW_FRACTION), Math.floor(n / 2)));

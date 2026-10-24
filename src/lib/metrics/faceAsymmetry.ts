@@ -116,6 +116,21 @@ export function faceAsymmetry(
   if (signed.length < QUALITY.MIN_FACE_FRAMES) return poorQuality('face');
 
   const m = median(signed);
+  // Direction-agreement gate: a genuine one-sided droop makes most frames lean the same way. If the
+  // frames DISAGREE on direction and the median is small, the capture is ambiguous (the subject moved
+  // or was poorly tracked), so we RETRY instead of reporting a false near-zero. A clear droop
+  // (|median| ≥ FACE_AMBIGUOUS_MAX) is never suppressed — safety: only ever becomes more cautious.
+  if (Math.abs(m) < QUALITY.FACE_AMBIGUOUS_MAX) {
+    // A frame only "votes" for a side if it leans by more than the noise floor; smaller readings are
+    // floating-point dust or a practically-symmetric frame and are ignored. This keeps a truly
+    // symmetric face (residuals ~1e-14 that split sign) from tripping the gate.
+    const leaning = signed.filter((s) => Math.abs(s) > QUALITY.FACE_LEAN_EPSILON);
+    if (leaning.length > 0) {
+      const leaningToMedian = leaning.filter((s) => (m >= 0 ? s > 0 : s < 0)).length;
+      const agreement = leaningToMedian / leaning.length;
+      if (agreement < QUALITY.MIN_FACE_SIGN_AGREEMENT) return poorQuality('face');
+    }
+  }
   const side = m > 0 ? anatomicalSideOfA(mirrored) : m < 0 ? anatomicalSideOfB(mirrored) : null;
   return okResult('face', Math.abs(m), side);
 }
