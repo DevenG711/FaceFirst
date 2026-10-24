@@ -128,7 +128,7 @@ Properties (`tests/triage.property.test.ts`), each ≥ 1000 runs:
 | P3 | Any flagged check / BE-FAST yes / caregiver report ⇒ `CALL_911_NOW`, and reasons contain it | 2.1–2.4 |
 | P4 | Monotonicity: add one finding ⇒ urgency non-decreasing | 3.1 |
 | P5 | Monotonicity: increase one ok score ⇒ urgency non-decreasing | 3.2 |
-| P6 | Degrade one check ok → poor_quality ⇒ urgency non-decreasing | 4.3 |
+| P6 | Degrade one non-flagged check ok → poor_quality ⇒ urgency non-decreasing | 4.3 |
 | P7 | No findings + any poor_quality ⇒ `RETRY_CAPTURE` with correct retryChecks | 4.1, 4.4 |
 | P8 | Adding a baseline (any values) ⇒ urgency non-decreasing | 5.3 |
 | P9 | No findings, no poor_quality ⇒ `CANNOT_RULE_OUT` | 2.5 |
