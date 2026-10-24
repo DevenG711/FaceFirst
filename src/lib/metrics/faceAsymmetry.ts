@@ -101,6 +101,24 @@ export function frameAsymmetry(f: FaceFrameInput | null): number | null {
 }
 
 /**
+ * Pre-capture state of one frame, for the "start when smiling" gate:
+ * - `face`: no usable face (the frame faceAsymmetry would skip).
+ * - `smile`: face is fine but not smiling yet.
+ * - `ok`: smiling.
+ *
+ * SAFETY: "smiling" uses the STRONGER side (max of left/right). A face with one-sided weakness can
+ * only smile on one side, and that must still start the capture; requiring both sides would stall
+ * exactly the faces we most need to measure.
+ */
+export type FaceFit = 'ok' | 'face' | 'smile';
+
+export function faceFit(f: FaceFrameInput | null): FaceFit {
+  if (frameAsymmetry(f) === null) return 'face';
+  const smile = Math.max(f!.blendshapes.mouthSmileLeft!, f!.blendshapes.mouthSmileRight!);
+  return smile >= QUALITY.FACE_SMILE_START ? 'ok' : 'smile';
+}
+
+/**
  * Face asymmetry check. Score >= 0 in roughly inter-ocular units (compare with POPULATION_THRESHOLD.face).
  * Fewer than QUALITY.MIN_FACE_FRAMES usable frames gives `poor_quality`.
  */

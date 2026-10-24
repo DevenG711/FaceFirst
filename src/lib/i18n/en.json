@@ -35,7 +35,17 @@
       "moveCloser": "Move closer",
       "faceCamera": "Face the camera",
       "moreLight": "More light",
-      "holdStill": "Hold still"
+      "holdStill": "Hold still",
+      "arm": {
+        "shoulders": "Step back so both shoulders are in view",
+        "wrists": "Hold both arms straight out",
+        "ready": "Good, hold still"
+      },
+      "face": {
+        "face": "Put your face inside the oval",
+        "smile": "Smile big now",
+        "ready": "Good, keep smiling"
+      }
     },
     "camera": {
       "label": "Camera view",
@@ -46,12 +56,12 @@
     },
     "face": {
       "title": "Face check",
-      "instructions": "Look at the camera and smile big. We'll check if one side of the face droops.",
+      "instructions": "Smile big and show your teeth. Look at the camera. The check starts when you smile. We'll check if one side of the face droops.",
       "start": "Start face check"
     },
     "arm": {
       "title": "Arm check",
-      "instructions": "Hold both arms straight out in front of you, palms up. Keep them there. We'll check if one arm drifts down.",
+      "instructions": "Step back so your head, shoulders, and both arms are all in view. Hold both arms straight out in front of you, palms up, and keep them there. We'll check if one arm drifts down.",
       "start": "Start arm check"
     },
     "speech": {

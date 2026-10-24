@@ -34,17 +34,76 @@
   const instruct = () => speak(t($locale, `check.${id}.instructions`), $locale);
   onMount(instruct);
 
+  // Outcome of the pre-capture gate (arm: framed; face: smiling), or null while still waiting.
+  let gate = $state<'fit' | 'timeout' | null>(null);
+
+  // Line shown on the camera view once the timer runs. While waiting, CameraView shows its own hint.
+  // Face: "Good, keep smiling" once they smiled; if they never did, keep asking for the smile.
+  const captureCoachKey = $derived(
+    gate === 'timeout' ? `check.coach.${id}.${id === 'face' ? 'smile' : 'ready'}` : `check.coach.${id}.ready`
+  );
+  const coaching = $derived(
+    phase === 'checking'
+      ? t($locale, captureCoachKey)
+      : t($locale, id === 'face' ? 'check.coach.face.smile' : 'check.coach.faceCamera')
+  );
+
   function begin() {
     phase = 'checking';
+    gate = null;
     instruct();
+  }
+
+  function fitted(outcome: 'fit' | 'timeout') {
+    gate = outcome;
+    speak(t($locale, captureCoachKey), $locale);
   }
 
   function complete(result: CheckResult) {
     // Store the measured score and side from the vision layer. A poor_quality or unavailable
     // result flows straight into the engine, which can only make the outcome MORE cautious.
+    if (import.meta.env.DEV) logMeasured(result);
     setCheck(result);
     phase = 'done';
     setTimeout(() => goto(next), 1000);
+  }
+
+  // Dev-only: print what the camera actually measured for this check, so you can see what the
+  // vision layer found from the real media. Never shown in production builds.
+  function logMeasured(result: CheckResult) {
+    const measures =
+      result.status === 'ok'
+        ? result.id === 'face'
+          ? 'facial asymmetry (higher = more droop)'
+          : 'arm drift (higher = more drift)'
+        : '—';
+    const read =
+      result.status === 'ok'
+        ? result.id === 'face'
+          ? result.side
+            ? `droop on the ${result.side} side of the face`
+            : 'no clear droop side'
+          : result.side
+            ? `drift in the ${result.side} arm`
+            : 'no clear drift side'
+        : result.status === 'poor_quality'
+          ? 'could not measure cleanly — will ask for a retry'
+          : 'camera/model unavailable — treated cautiously';
+    // eslint-disable-next-line no-console
+    console.log(
+      `%c[FaceFirst] ${result.id} check — ${result.status}`,
+      'font-weight:700',
+      {
+        check: result.id,
+        status: result.status,
+        score: result.score,
+        measures,
+        side: result.side,
+        reading: read,
+      }
+    );
+    // eslint-disable-next-line no-console
+    console.table([{ check: result.id, status: result.status, score: result.score, side: result.side }]);
   }
 
   function skip() {
@@ -63,8 +122,9 @@
     locale={$locale}
     active={phase === 'checking'}
     duration={captureMs}
-    coaching={t($locale, phase === 'checking' ? 'check.coach.holdStill' : 'check.coach.faceCamera')}
+    {coaching}
     oncomplete={complete}
+    onfit={fitted}
   />
 
   <p class="status" aria-live="polite">

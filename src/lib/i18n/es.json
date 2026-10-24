@@ -35,7 +35,17 @@
       "moveCloser": "Acérquese más",
       "faceCamera": "Mire hacia la cámara",
       "moreLight": "Necesita más luz",
-      "holdStill": "Quédese quieto"
+      "holdStill": "Quédese quieto",
+      "arm": {
+        "shoulders": "Retroceda para que se vean los dos hombros",
+        "wrists": "Extienda los dos brazos al frente",
+        "ready": "Bien, quédese quieto"
+      },
+      "face": {
+        "face": "Ponga su cara dentro del óvalo",
+        "smile": "Sonría ampliamente ahora",
+        "ready": "Bien, siga sonriendo"
+      }
     },
     "camera": {
       "label": "Vista de la cámara",
@@ -46,12 +56,12 @@
     },
     "face": {
       "title": "Revisión de la cara",
-      "instructions": "Mire a la cámara y sonría ampliamente. Revisaremos si un lado de la cara se cae.",
+      "instructions": "Sonría ampliamente y muestre los dientes. Mire a la cámara. La revisión empieza cuando sonría. Revisaremos si un lado de la cara se cae.",
       "start": "Comenzar la revisión de la cara"
     },
     "arm": {
       "title": "Revisión de los brazos",
-      "instructions": "Extienda ambos brazos hacia adelante, con las palmas hacia arriba. Manténgalos así. Revisaremos si un brazo baja.",
+      "instructions": "Aléjese para que la cabeza, los hombros y ambos brazos queden a la vista. Extienda ambos brazos hacia adelante, con las palmas hacia arriba, y manténgalos así. Revisaremos si un brazo baja.",
       "start": "Comenzar la revisión de los brazos"
     },
     "speech": {
