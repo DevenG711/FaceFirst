@@ -19,6 +19,10 @@ npm run lint:safety  # scripts/safety-lint.mjs
 
 Before every commit: `npm run check && npm run build && npx vitest --run && node scripts/safety-lint.mjs`.
 
+## Deploy (Vercel)
+
+`vercel.json` holds the whole config: `npm ci`, `npm run build`, static output in `build/`, clean URLs, an SPA fallback to `200.html`, and a `Permissions-Policy` that allows the camera and microphone on this origin only. Import the repo in Vercel and keep the framework preset on "Other" (`vercel.json` sets it). Set the Node.js version to 22.x in Project Settings. HTTPS is required for camera access, and Vercel provides it.
+
 ## Stack notes (SvelteKit 3)
 
 - SvelteKit config lives in `vite.config.ts` via `sveltekit({ ... })`. There is no `svelte.config.js` (Kit 3 rejects it).
@@ -32,7 +36,7 @@ Before every commit: `npm run check && npm run build && npx vitest --run && node
 | Area | Owner |
 |---|---|
 | Project scaffold, `src/lib/triage` (types, thresholds, engine, copy, banned words), `src/lib/metrics`, `tests/*` | Partner 1 (engine) |
-| `src/lib/vision`, `src/lib/storage`, `src/routes`, `src/lib/components`, specs `face-check`, `arm-check`, `speech-check`, `ems-card`, `baseline` | Partner 2 |
+| `src/lib/vision`, `src/lib/storage`, `src/routes`, `src/lib/components`, specs `check-flow`, `speech-check` | Partner 2 |
 
 The placeholder routes and `Call911Button.svelte` are minimal scaffolding. Restyle or replace them freely, but `Call911Button` must stay first in `+layout.svelte` with `href="tel:911"` (the safety lint enforces this).
 

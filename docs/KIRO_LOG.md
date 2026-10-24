@@ -7,13 +7,14 @@ A running journal of how we built FaceFirst with Kiro during Hackachusetts 2026.
 | Kiro feature | Where | What it does for us |
 |---|---|---|
 | Steering | `.kiro/steering/` | `product`, `tech`, `structure`, `safety` (always included); `design` (included only for `.svelte`/`.css`/`.json` files) |
-| Specs | `.kiro/specs/` | One per feature, EARS requirements, PBT-tagged acceptance criteria. Order: triage-engine → face-check → arm-check → speech-check → ems-card → baseline |
+| Specs | `.kiro/specs/` | EARS requirements, test-tagged acceptance criteria, task lists. `triage-engine` and `metrics` were written before the code. `check-flow` and `speech-check` were written from the code afterwards, by parallel sub-agents, and list their own open tasks |
 | Hooks | `.kiro/hooks/` | `test-on-save`, `safety-lint-on-save`, `safety-lint-after-agent-edit`, `translation-sync`, `kiro-journal`, `a11y-check-new-component` |
-| MCP | `.kiro/settings/mcp.json` (template: `docs/mcp.example.json`) | Playwright (end-to-end checks + screenshots of the live app), GitHub (issues/PRs), Context7 (current MediaPipe / SvelteKit docs) |
+| MCP | `.kiro/settings/mcp.json` (template: `docs/mcp.example.json`) | Configured: Context7 (current MediaPipe / SvelteKit docs) and Playwright (browser checks) |
 | Property-based testing | `tests/*.property.test.ts` | fast-check proofs of the safety rules (no reassurance, monotonicity, quality never less urgent) |
-| Kiro CLI | `.github/workflows/ci.yml` | Runs tests + safety lint on every push; headless Kiro CLI safety review on PRs |
-| Powers | IDE Powers panel | _Record which were installed and why._ |
-| Parallel agents | Kiro Web / second session | _Record what ran in parallel and why._ |
+| CI | `.github/workflows/ci.yml` | Safety lint + all tests on every push and PR. A headless Kiro CLI safety review job is wired for PRs and runs once the `KIRO_API_KEY` repo secret is set |
+| Kiro IDE | this repo | Spec-driven, supervised work on the safety-critical core: steering, specs, hooks, the triage engine, metrics and property tests |
+| Kiro Crew | dashboard sessions on the same workspace | Long unattended runs: branch merges, wiring real vision, accuracy fixtures, the `/simulate` harness, PRs. Crew reads the same `.kiro/steering`, so its work follows the same safety rules. It tracked progress in its work ledger |
+| Sub-agents | Kiro IDE | Context-gatherer and general-task sub-agents for investigation and parallel spec writing |
 
 ## Entries
 
@@ -55,3 +56,25 @@ A running journal of how we built FaceFirst with Kiro during Hackachusetts 2026.
 - **Tests:** `tests/metricChecks.property.test.ts` has 29 tests: every property from the plan, plus one `triage()` integration test per check (face and arm droop on the left give `CALL_911_NOW` naming `left`). 73/73 tests pass, check 0 errors, build OK, lint OK.
 - **Went wrong / changed:** All tests passed on the first run, so we mutation-tested. Two arm mutations survived (removing the scale normalization, removing the floor). The cause was that `fc.double` biases toward ~0, so almost every generated arm hold was flat and every score was ~1e-300. We fixed the generator (integer-based start + ramp + jitter) and added a "rising arm is not drift" test. After that, every mutation fails a test. Two plan properties ("lowering one mouth corner / more drift on one arm never lowers the score") are false as written, because changing the stronger side makes the person more symmetric. We restated them for the weaker side. We used LCS instead of WER for speech, because under WER "dropping words never lowers the score" is false.
 - **Open:** `BLENDSHAPE_LEFT_IS_SIDE` is an assumption (that "Left" means the model's left, i.e. image-right in a raw camera frame). It needs a live one-sided smile to confirm. An arm that drops out of frame gives `poor_quality` → `RETRY_CAPTURE` rather than red; the caregiver "arm weak" button covers that case.
+
+### 2026-10-24 13:15 to 14:36 — Kiro Crew: merge, real vision, UI polish (PRs #2, #3)
+- **Built:** Crew merged `engine` and `copyandui` into `combined`. Then, while we were away, it ran on its own: it wired real MediaPipe face/pose detection into the metrics (`89e4e3f`), pulled out the pure frame mappers with tests (`2ae6de6`), built `/result` and `/baseline` (`b227383`), added the flow stepper and result typography, did a UI polish pass (`a8b8e82`) and opened PRs #2 and #3.
+- **Kiro features used:** Kiro Crew from the dashboard, an unattended goal ("simple, accurate, good looking"), and its work ledger to track phases (implementing, then done). Steering is shared across the workspace, so the unattended run kept the 911-first, no-green and escalate-only rules.
+- **Went wrong / changed:** We asked for many subagents. Crew's admission gate held them because the laptop was short on memory, so Crew did the work one step at a time. One probe subagent stayed queued and was stopped.
+
+### 2026-10-24 14:50 to 15:26 — Kiro Crew: accuracy work, sensor-first flow (PR #4)
+- **Built:** End-to-end fixture tests and capture-quality gates (`e03463f`). The flow is now sensor-first, with the BE-FAST questions optional (`887145f`). These were merged to `main` through PR #4.
+- **Kiro features used:** Kiro Crew. The property tests caught a bug in its own gate: floating-point residuals (+1e-16 / −1e-16) on a symmetric face split in sign and tripped the gate, which broke "a symmetric face scores ~0". It fixed the gate rather than the test.
+- **Went wrong / changed:** The tests prove the math and the wiring, not detection on real stroke faces. That gap is still open (see `check-flow` task 10).
+
+### 2026-10-24 15:36 to 16:06 — Kiro Crew: dev test harness (`test-harness` branch)
+- **Built:** `/simulate` and the `window.facefirst` console harness (`a4a2838`). Both replay seeded clips through the real `mapFrames`, metrics and `triage()`, without a camera. The clips are shared with `tests/pipeline.fixture.test.ts`. Both are dev only.
+- **Kiro features used:** Kiro Crew, plus a local server for review.
+
+### 2026-10-24 16:10 to 16:50 — Kiro Crew: live debugging from screenshots
+- **Changed:** Dev builds now log each camera check's `CheckResult` to the console. From a screenshot of the arm step, Crew found that the person was framed too close (no shoulders or wrists), so arm drift read 0. It switched the arm camera to a wide landscape frame and rewrote the instruction.
+- **Went wrong / changed:** We proposed combining the face and arm steps by holding the phone in the outstretched arm. Crew pushed back: when the arm drifts, the camera moves with it and the face slides out of frame. We kept two steps.
+
+### 2026-10-24 — Kiro IDE: spec back-fill and repo audit
+- **Built:** `.kiro/specs/check-flow/` and `.kiro/specs/speech-check/`, written from the implementation by two general-task sub-agents running in parallel. Each criterion is tagged only where a test really covers it, and each spec lists its open tasks. `structure.md` now matches the real tree. The MCP template (`docs/mcp.example.json`) dropped the unused GitHub server and fixed Context7's `autoApprove` tool name (`query-docs`).
+- **Went wrong / changed:** The specs exposed drift from `tech.md`: `requestAnimationFrame` instead of `requestVideoFrameCallback`, no GPU→CPU fallback, no fps logging, a stale `speechErrorScore` comment, and the baseline not yet passed to `triage()`. These are open tasks now, not hidden.
