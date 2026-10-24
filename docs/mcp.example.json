@@ -12,19 +12,11 @@
         "browser_console_messages"
       ]
     },
-    "github": {
-      "url": "https://api.githubcopilot.com/mcp/",
-      "headers": {
-        "Authorization": "Bearer ${GITHUB_PERSONAL_ACCESS_TOKEN}"
-      },
-      "disabled": false,
-      "autoApprove": ["get_file_contents", "list_issues", "get_issue", "list_pull_requests", "get_pull_request"]
-    },
     "context7": {
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp@4.4.4"],
       "disabled": false,
-      "autoApprove": ["resolve-library-id", "get-library-docs"]
+      "autoApprove": ["resolve-library-id", "query-docs"]
     }
   }
 }

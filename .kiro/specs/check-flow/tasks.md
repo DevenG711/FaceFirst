@@ -1,0 +1,76 @@
+# Implementation Plan: Check Flow
+
+- [x] 1. Flow and routes
+  - [x] 1.1 Home: always-enabled Start link to `/check/face`, optional symptom-onset chips with `recordedAt`, language switcher.
+    - _Requirements: 1.1, 1.2, 1.3_
+  - [x] 1.2 `/check/face` (step 1) → `/check/arm` (step 2, `duration={10000}`) → `/check/speech` (step 3) → `/result`, with Back links.
+    - _Requirements: 1.4, 1.5_
+  - [x] 1.3 `FlowProgress` stepper on the three check screens.
+    - _Requirements: 1.5_
+  - [x] 1.4 `/check/befast`: one question at a time, yes / no / not sure, Back, Skip; always exits to `/result`.
+    - _Requirements: 1.6, 5.4_
+- [x] 2. Camera components
+  - [x] 2.1 `CameraCheck.svelte`: phases, Start / Back / Skip, store result, neutral "check complete", 1 s advance.
+    - _Requirements: 1.7, 1.8, 8.2_
+  - [x] 2.2 `CameraView.svelte`: `getUserMedia` (wide frame for arm), CSS-only mirror, canvas guide, progress bar, denied / unsupported message, track cleanup.
+    - _Requirements: 2.1–2.7_
+  - [x] 2.3 `FaceGuide.svelte` placeholder drawing.
+    - _Requirements: 2.4_
+- [x] 3. Vision pipeline
+  - [x] 3.1 `mapFrames.ts`: pure `faceFrameFromResult` / `armFrameFromResult` with structural result types.
+    - _Requirements: 3.6–3.9_
+  - [x] 3.2 `index.ts`: lazy cached landmarkers, same-origin WASM, `collect()` loop, `runCameraCheck` with `{ mirrored: false }` and `unavailable` on failure.
+    - _Requirements: 3.1–3.5, 3.10, 8.4_
+  - [x] 3.3 `tests/vision-mapping.test.ts`.
+    - _Requirements: 3.6–3.8_
+  - [x] 3.4 `tests/pipeline.fixture.test.ts` over the shared clips.
+    - _Requirements: 3.11, 9.5_
+- [x] 4. Capture-quality gates
+  - [x] 4.1 `faceFit` / `armFit` in the metrics, tested in `tests/metricChecks.property.test.ts`.
+    - _Requirements: 4.4_
+  - [x] 4.2 `waitForFit`: consecutive-frame streak, hint on change, face timeout, `aborted` / `error` outcomes.
+    - _Requirements: 4.1–4.3, 4.5–4.7_
+  - [x] 4.3 Gate numbers `ARM_FIT_FRAMES`, `FACE_SMILE_START`, `FACE_SMILE_FRAMES`, `FACE_SMILE_WAIT_MS` in `thresholds.ts`, marked uncalibrated.
+    - _Requirements: 4.8_
+  - [ ] 4.4 Automated test for the `waitForFit` loop (streak reset, timeout, abort) with a fake video and landmarker.
+    - _Requirements: 4.2, 4.3, 4.5, 4.7_
+- [x] 5. Session and voice
+  - [x] 5.1 `session.ts` stores and setters; checks start as `unavailable`.
+    - _Requirements: 5.1–5.5_
+  - [x] 5.2 `voice.ts` `speak()` with `VOICE_LANG`, no-op when unsupported; prompts wired on home, checks, BE-FAST and result.
+    - _Requirements: 6.1–6.3_
+  - [ ] 5.3 Unit tests for `session.ts` setters.
+    - _Requirements: 5.3, 5.5_
+- [x] 6. Result screen
+  - [x] 6.1 `triage()` + `resultCopy()` from the session, per-state actions, per-check tags, onset time, assertive headline.
+    - _Requirements: 7.1–7.7, 8.2_
+  - [ ] 6.2 Pass a recorded baseline into `triage()` (currently `baseline: null`).
+    - _Requirements: 7.1_
+- [x] 7. Safety wiring
+  - [x] 7.1 `Call911Button` first in the sticky header of `+layout.svelte`; checked by `scripts/safety-lint.mjs`.
+    - _Requirements: 8.1_
+  - [x] 7.2 Skip and failures stored as `unavailable` / `poor_quality`; no green on check or result screens.
+    - _Requirements: 8.2, 8.3_
+- [x] 8. Dev-only tools
+  - [x] 8.1 `scenarios.ts` clip library, re-exported by `tests/fixtures/clips.ts`.
+    - _Requirements: 9.5_
+  - [x] 8.2 `testHarness.ts` (`window.facefirst`), installed from `+layout.svelte` only in dev.
+    - _Requirements: 9.1, 9.2, 9.6_
+  - [x] 8.3 `/simulate` page: scenarios, live verdict, redirect home outside dev.
+    - _Requirements: 9.3, 9.4, 9.6_
+- [ ] 9. Steering gaps
+  - [ ] 9.1 Drive detection with `requestVideoFrameCallback` and a `mediaTime`-based timestamp.
+    - _Requirements: 3.3_
+  - [ ] 9.2 Try `delegate: "GPU"` and fall back to `"CPU"` on failure.
+    - _Requirements: 3.1_
+  - [ ] 9.3 Measure and log fps in dev builds; confirm ≥ 20 fps face tracking on a MacBook Air in Chrome.
+    - _Requirements: 3.3_
+- [ ] 10. Live verification on a real device
+  - [ ] 10.1 Confirm `BLENDSHAPE_LEFT_IS_SIDE` with the real camera (see `.kiro/specs/metrics/tasks.md` task 6).
+    - _Requirements: 3.10_
+  - [ ] 10.2 Confirm a deliberate left-side droop and a left-arm drop are reported as `left` on the result screen.
+    - _Requirements: 3.10, 3.11_
+  - [ ] 10.3 Confirm both gates start reliably on a phone and a laptop, in bright and dim room light.
+    - _Requirements: 4.2, 4.3, 4.5_
+  - [ ] 10.4 Confirm the camera-denied message, Skip and the 911 button on iOS Safari and Android Chrome.
+    - _Requirements: 2.5, 8.1_

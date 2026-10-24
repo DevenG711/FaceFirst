@@ -1,0 +1,54 @@
+# Implementation Plan: Speech Check
+
+- [x] 1. Word scoring
+  - [x] 1.1 `speech.ts`: `words`, `speechScore` (LCS word error), `speechTiming`, per `.kiro/specs/metrics/tasks.md` task 4.
+    - _Requirements: 1.1, 1.4_
+  - [x] 1.2 Target phrase `check.speech.phrase` in en, es and pt (English: "You can't teach an old dog new tricks.").
+    - _Requirements: 1.2_
+- [x] 2. Acoustic proxies
+  - [x] 2.1 `ACOUSTIC_PARAMS` in `thresholds.ts`, each marked uncalibrated.
+    - _Requirements: 2.3, 9.1_
+  - [x] 2.2 `rms`, `voicedFloor`, `speechAcoustics` (rate, pause, envelope sub-scores over the speech span).
+    - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
+  - [x] 2.3 `combineSpeechScore` and the optional `audio` input on `speechScore`.
+    - _Requirements: 3.1, 3.2, 3.4, 3.5, 3.6, 3.7_
+  - [x] 2.4 Properties in `tests/speechAcoustics.property.test.ts`.
+    - _Requirements: 2.1, 2.4, 2.6, 2.7, 2.8, 3.1, 3.2, 3.3, 3.4, 3.5_
+  - [x] 2.5 Fluent vs. slow, flat, over-paused examples in `tests/speechMetric.test.ts`.
+    - _Requirements: 2.1, 2.9, 3.2_
+- [x] 3. Speech route
+  - [x] 3.1 Feature detection and recognizer setup (`VOICE_LANG`, continuous, interim results).
+    - _Requirements: 4.1, 4.2_
+  - [x] 3.2 Listen through pauses: restart on browser stop, `LISTEN_PARAMS` limits, "Done speaking", stale-event guard, cleanup on leave.
+    - _Requirements: 4.3, 4.4, 4.5, 4.7, 4.8, 4.9_
+  - [x] 3.3 Mic error handling (`micDenied` → speech `unavailable`).
+    - _Requirements: 4.6_
+  - [x] 3.4 `AnalyserNode` capture with `AudioContext` resumed inside the tap; wave bars.
+    - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
+  - [x] 3.5 Score once per attempt with `speechScore(transcript ?? '', phrase, { audio })` and set the phase.
+    - _Requirements: 1.3, 6.4_
+  - [x] 3.6 Caregiver fallback buttons in the fallback phases, writing `speech_wrong`.
+    - _Requirements: 6.1, 6.2, 6.3, 6.5_
+  - [x] 3.7 Google-servers disclosure in en, es and pt.
+    - _Requirements: 7.1_
+  - [x] 3.8 Spoken instructions via `speak()`, cancelled when listening starts; same text on screen; copy from i18n.
+    - _Requirements: 8.1, 8.2, 8.3, 8.4_
+  - [x] 3.9 Dev-only tuning readout.
+    - _Requirements: 7.3_
+- [x] 4. Checkpoint
+  - `npx vitest --run` green (120 tests) and `node scripts/safety-lint.mjs` OK.
+- [ ] 5. Route tests
+  - No automated tests cover the route (restart on pause, listening limits, fallback phases, disclosure visibility).
+  - _Requirements: 4.1 to 4.9, 5.1 to 5.5, 6.1 to 6.5, 7.1_
+- [ ] 6. Live multilingual testing
+  - Run the check with native Spanish and Portuguese speakers (`es-US`, `pt-BR` recognizers). Only one tester's English recordings were used so far.
+  - _Requirements: 1.2, 4.2_
+- [ ] 7. Calibration
+  - `ACOUSTIC_PARAMS`, `LISTEN_PARAMS` and `POPULATION_THRESHOLD.speech` are uncalibrated placeholders. Calibration needs recordings from many speakers, with and without dysarthria.
+  - _Requirements: 9.1_
+- [ ] 8. Clean up `speechErrorScore`
+  - Its comment says the route uses it; the route uses `speechScore`. Either remove it or fix the comment. Update the speech threshold comments to mention the acoustic term.
+  - _Requirements: 1.1, 9.1_
+- [ ] 9. Stretch: on-device Whisper via `transformers.js`
+  - Would keep audio on the device and remove the need for the Google-servers disclosure. Not started.
+  - _Requirements: 7.1, 7.2_
