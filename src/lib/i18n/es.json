@@ -57,9 +57,10 @@
     "speech": {
       "title": "Revisión del habla",
       "instructions": "Pídale que lea esta frase en voz alta:",
-      "phrase": "El cielo está azul hoy.",
+      "phrase": "A perro viejo no se le enseñan trucos nuevos.",
       "start": "Toque y hable",
-      "listening": "Escuchando…",
+      "listening": "Escuchando… tómese su tiempo.",
+      "done": "Terminé de hablar",
       "heard": "Escuchamos:",
       "noSpeech": "No escuchamos nada. Intente de nuevo o responda la pregunta de abajo.",
       "unclear": "No pudimos obtener una grabación clara. Intente de nuevo o responda la pregunta de abajo.",

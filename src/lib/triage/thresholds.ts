@@ -57,27 +57,54 @@ export const METRIC_PARAMS = {
 export const ACOUSTIC_PARAMS = {
   SAMPLE_MS: 50, // how often the speech route samples RMS amplitude, in ms. Uncalibrated placeholder.
 
-  // Articulation rate: target words per second of voiced (non-silent) time. Slow = suspicious.
+  // A sample counts as voiced only above this fraction of the attempt's loudest sample (and above
+  // QUALITY.SILENCE_LEVEL), so room hum or a hot mic is not mistaken for speech, which would make
+  // fluent speech look slow and hide real pauses. Uncalibrated placeholder.
+  RELATIVE_SILENCE: 0.15,
+
+  // Speaking rate: target words per second over the speech span (first to last voiced sample). The
+  // span's ends are easy to find, so this is far steadier run to run than voiced-time-only articulation
+  // rate, which flips with every syllable near the voiced floor. One fluent read: 4.35; one deliberately
+  // slurred read: 0.49 (single-tester check, not calibration). Slow = suspicious.
   MIN_WORDS_PER_SEC: 2.0, // at or above this, the rate sub-score is 0. Uncalibrated placeholder.
   SLOW_WORDS_PER_SEC: 1.0, // at or below this, the rate sub-score is 1. Uncalibrated placeholder.
 
   // Pauses: share of the speech span (first to last voiced sample) spent in pauses of at least
   // QUALITY.MIN_PAUSE_MS, and the longest single hesitation. Many or long pauses = suspicious.
-  MAX_PAUSE_RATIO: 0.3, // at or below this pause share, the pause sub-score is 0. Uncalibrated placeholder.
+  // 0.35 leaves room for natural pauses: one fluent read measured 0.24 (single-tester check, not calibration).
+  MAX_PAUSE_RATIO: 0.35, // at or below this pause share, the pause sub-score is 0. Uncalibrated placeholder.
   HIGH_PAUSE_RATIO: 0.6, // at or above this pause share, the pause sub-score is 1. Uncalibrated placeholder.
   LONG_PAUSE_MS: 1000, // a single hesitation this long starts to count. Uncalibrated placeholder.
   VERY_LONG_PAUSE_MS: 2500, // a single hesitation this long gives a pause sub-score of 1. Uncalibrated placeholder.
 
   // Envelope modulation: coefficient of variation (std / mean) of voiced amplitudes. Flat, under-
   // modulated ("mushy") speech has a low value. Scale-free, so microphone gain does not matter.
-  MIN_ENVELOPE_CV: 0.4, // at or above this, the envelope sub-score is 0. Uncalibrated placeholder.
-  FLAT_ENVELOPE_CV: 0.15, // at or below this, the envelope sub-score is 1. Uncalibrated placeholder.
+  // In single-tester checks fluent (0.54–1.03) and slurred (0.47–0.78) reads overlapped, so this
+  // proxy is set to catch only clearly flat speech and is weighted lowest, to keep run-to-run noise down.
+  MIN_ENVELOPE_CV: 0.3, // at or above this, the envelope sub-score is 0. Uncalibrated placeholder.
+  FLAT_ENVELOPE_CV: 0.1, // at or below this, the envelope sub-score is 1. Uncalibrated placeholder.
 
   // Weights that average the three sub-scores into one acoustic score in [0, 1].
-  WEIGHT_RATE: 0.4, // Uncalibrated placeholder.
+  WEIGHT_RATE: 0.5, // steadiest proxy, weighted highest. Uncalibrated placeholder.
   WEIGHT_PAUSE: 0.3, // Uncalibrated placeholder.
-  WEIGHT_ENVELOPE: 0.3, // Uncalibrated placeholder.
+  WEIGHT_ENVELOPE: 0.2, // noisiest proxy, weighted lowest. Uncalibrated placeholder.
 
-  /** Final speech score = min(1, word error + ACOUSTIC_WEIGHT × acoustic score). Uncalibrated placeholder. */
-  ACOUSTIC_WEIGHT: 0.5,
+  /**
+   * Final speech score = min(1, word error + ACOUSTIC_WEIGHT × acoustic score). At 0.7, acoustics alone
+   * flag (> POPULATION_THRESHOLD.speech) once the acoustic score passes ~0.43, i.e. at least two strong
+   * proxies together. One deliberately slow, over-paused read scored 0.55; a fluent read scored 0
+   * (single-tester check, not calibration). Uncalibrated placeholder.
+   */
+  ACOUSTIC_WEIGHT: 0.7,
+} as const;
+
+/**
+ * How long the speech check keeps listening. Generous on purpose: slurred or effortful speech can be
+ * slow, with long gaps between words, and must not be cut off as "silence" (those gaps are what the
+ * pause proxy measures). UNCALIBRATED placeholders.
+ */
+export const LISTEN_PARAMS = {
+  START_TIMEOUT_MS: 10000, // stop if nothing at all is heard for this long after tapping. Uncalibrated placeholder.
+  END_SILENCE_MS: 4000, // once speech has started, stop only after this much continuous silence. Uncalibrated placeholder.
+  MAX_LISTEN_MS: 30000, // hard cap per attempt. Uncalibrated placeholder.
 } as const;

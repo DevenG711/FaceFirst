@@ -120,7 +120,9 @@ export function rms(samples: ArrayLike<number>): number {
 // add to the speech score; nothing here can lower it or report speech as fine.
 
 export interface SpeechAcoustics {
-  /** Target words per second of voiced time. Low = slow, effortful speech. */
+  /** Level above which a sample counted as voiced (see `voicedFloor`). */
+  floor: number;
+  /** Target words per second over the speech span (first to last voiced sample). Low = slow, effortful speech. */
   wordsPerSecond: number;
   /** Share of the speech span (first to last voiced sample) spent in pauses of at least QUALITY.MIN_PAUSE_MS. */
   pauseRatio: number;
@@ -130,6 +132,19 @@ export interface SpeechAcoustics {
   envelopeCv: number;
   /** Weighted average of the three sub-scores, in [0, 1]. Higher = more abnormal. */
   score: number;
+}
+
+/**
+ * Level a sample must exceed to count as voiced in the acoustic proxies: QUALITY.SILENCE_LEVEL, or
+ * ACOUSTIC_PARAMS.RELATIVE_SILENCE of the loudest sample if that is higher (adapts to room noise).
+ */
+export function voicedFloor(amplitudes: ArrayLike<number>): number {
+  let loudest = 0;
+  for (let i = 0; i < amplitudes.length; i++) {
+    const a = amplitudes[i]!;
+    if (Number.isFinite(a) && a > loudest) loudest = a;
+  }
+  return Math.max(QUALITY.SILENCE_LEVEL, ACOUSTIC_PARAMS.RELATIVE_SILENCE * loudest);
 }
 
 /** 0 at or before `ok`, 1 at or past `bad`, linear between; works whichever way `bad` lies. */
@@ -149,7 +164,8 @@ export function speechAcoustics(
   targetWords: number
 ): SpeechAcoustics | null {
   if (!(sampleMs > 0) || !Number.isFinite(sampleMs) || !(targetWords > 0)) return null;
-  const voiced = (a: number) => Number.isFinite(a) && a > QUALITY.SILENCE_LEVEL;
+  const floor = voicedFloor(amplitudes);
+  const voiced = (a: number) => Number.isFinite(a) && a > floor;
 
   let first = -1;
   let last = -1;
@@ -160,7 +176,7 @@ export function speechAcoustics(
   }
   if (first < 0) return null;
 
-  // Pauses use the same rule as speechTiming: a silent run of at least QUALITY.MIN_PAUSE_MS.
+  // Pauses use speechTiming's length rule (a silent run of at least QUALITY.MIN_PAUSE_MS), with the adaptive floor.
   const levels: number[] = [];
   let pausedSamples = 0;
   let longestRun = 0;
@@ -182,8 +198,11 @@ export function speechAcoustics(
   const mean = levels.reduce((s, a) => s + a, 0) / levels.length;
   const variance = levels.reduce((s, a) => s + (a - mean) ** 2, 0) / levels.length;
 
-  const wordsPerSecond = targetWords / ((levels.length * sampleMs) / 1000);
-  const pauseRatio = pausedSamples / (last - first + 1);
+  // Rate over the whole span, not voiced time only: the span's ends are stable from one attempt to the
+  // next, while voiced time flips with every quiet syllable near the floor.
+  const spanSamples = last - first + 1;
+  const wordsPerSecond = targetWords / ((spanSamples * sampleMs) / 1000);
+  const pauseRatio = pausedSamples / spanSamples;
   const longestPauseMs = longestRun * sampleMs;
   const envelopeCv = Math.sqrt(variance) / mean;
 
@@ -198,7 +217,7 @@ export function speechAcoustics(
     (P.WEIGHT_RATE * rate + P.WEIGHT_PAUSE * pause + P.WEIGHT_ENVELOPE * envelope) /
     (P.WEIGHT_RATE + P.WEIGHT_PAUSE + P.WEIGHT_ENVELOPE);
 
-  return { wordsPerSecond, pauseRatio, longestPauseMs, envelopeCv, score };
+  return { floor, wordsPerSecond, pauseRatio, longestPauseMs, envelopeCv, score };
 }
 
 /**

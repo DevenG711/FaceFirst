@@ -57,9 +57,10 @@
     "speech": {
       "title": "Speech check",
       "instructions": "Ask them to read this sentence out loud:",
-      "phrase": "The sky is blue today.",
+      "phrase": "You can't teach an old dog new tricks.",
       "start": "Tap and speak",
-      "listening": "Listening…",
+      "listening": "Listening… take your time.",
+      "done": "Done speaking",
       "heard": "We heard:",
       "noSpeech": "We didn't hear anything. Try again, or answer the question below.",
       "unclear": "We couldn't get a clear recording. Try again, or answer the question below.",

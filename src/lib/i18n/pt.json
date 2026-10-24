@@ -57,9 +57,10 @@
     "speech": {
       "title": "Verificação da fala",
       "instructions": "Peça para a pessoa ler esta frase em voz alta:",
-      "phrase": "O céu está azul hoje.",
+      "phrase": "Não se ensina truques novos a um cachorro velho.",
       "start": "Toque e fale",
-      "listening": "Ouvindo…",
+      "listening": "Ouvindo… não tenha pressa.",
+      "done": "Terminei de falar",
       "heard": "Ouvimos:",
       "noSpeech": "Não ouvimos nada. Tente de novo ou responda à pergunta abaixo.",
       "unclear": "Não conseguimos uma gravação clara. Tente de novo ou responda à pergunta abaixo.",

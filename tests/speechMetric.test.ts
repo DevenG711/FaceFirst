@@ -57,6 +57,14 @@ describe('acoustic proxies: fluent vs. slow, mushy, over-paused', () => {
     expect(a.envelopeCv).toBeLessThan(ACOUSTIC_PARAMS.MIN_ENVELOPE_CV);
   });
 
+  it('background hum in the gaps does not make fluent speech look slow', () => {
+    // The same fluent read, but every gap is filled with steady room noise well above the fixed silence level.
+    const noisy = fluent.map((a) => (a === 0 ? 0.05 : a));
+    const a = speechAcoustics(noisy, MS, 5)!;
+    expect(a.floor).toBeGreaterThan(0.05);
+    expect(a.score).toBe(0);
+  });
+
   it('acoustics stack on top of missed words; they never reduce the score', () => {
     const wordsOnly = speechScore('the sky', PHRASE);
     const withAudio = speechScore('the sky', PHRASE, { audio: { amplitudes: slurred, sampleMs: MS } });

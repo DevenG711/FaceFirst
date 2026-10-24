@@ -1,7 +1,7 @@
 // Properties of the acoustic speech proxies: escalate-only, bounded, and the quality gates still hold.
 import { describe, expect, it } from 'vitest';
 import fc from 'fast-check';
-import { combineSpeechScore, speechAcoustics, speechScore } from '#lib/metrics/speech.ts';
+import { combineSpeechScore, speechAcoustics, speechScore, voicedFloor } from '#lib/metrics/speech.ts';
 import { ACOUSTIC_PARAMS, QUALITY } from '#lib/triage/thresholds.ts';
 
 const RUNS = { numRuns: 1000 };
@@ -53,7 +53,8 @@ describe('speechAcoustics', () => {
     const minPause = Math.ceil(QUALITY.MIN_PAUSE_MS / MS); // shorter gaps are not hesitations
     fc.assert(
       fc.property(arbEnvelope, fc.nat(), fc.integer({ min: minPause, max: 80 }), arbWordCount(), (amps, at, len, n) => {
-        const voicedIdx = amps.flatMap((a, i) => (a > QUALITY.SILENCE_LEVEL ? [i] : []));
+        const floor = voicedFloor(amps);
+        const voicedIdx = amps.flatMap((a, i) => (a > floor ? [i] : []));
         fc.pre(voicedIdx.length >= 2);
         const first = voicedIdx[0]!;
         const last = voicedIdx[voicedIdx.length - 1]!;
@@ -70,10 +71,25 @@ describe('speechAcoustics', () => {
       fc.property(arbEnvelope, arbWordCount(), (amps, n) => {
         const before = speechAcoustics(amps, MS, n);
         fc.pre(before !== null);
-        const voiced = amps.filter((a) => a > QUALITY.SILENCE_LEVEL);
-        const mean = voiced.reduce((s, a) => s + a, 0) / voiced.length;
-        const flat = amps.map((a) => (a > QUALITY.SILENCE_LEVEL ? mean : a));
+        // Raise every voiced sample to the loudest level: no modulation left, same voiced/silent split.
+        const floor = voicedFloor(amps);
+        const loudest = Math.max(...amps);
+        const flat = amps.map((a) => (a > floor ? loudest : a));
         expect(speechAcoustics(flat, MS, n)!.score).toBeGreaterThanOrEqual(before!.score - EPS);
+      }),
+      RUNS
+    );
+  });
+
+  it('room hum below the adaptive floor is not counted as speech', () => {
+    fc.assert(
+      fc.property(arbSpokenEnvelope, arbWordCount(), (amps, n) => {
+        const before = speechAcoustics(amps, MS, n);
+        fc.pre(before !== null);
+        // Fill every silent sample with hum just under the floor: nothing about the speech changes.
+        const hum = voicedFloor(amps) * 0.99;
+        const humming = amps.map((a) => (a === 0 ? hum : a));
+        expect(speechAcoustics(humming, MS, n)).toEqual(before);
       }),
       RUNS
     );
