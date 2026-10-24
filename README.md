@@ -1,6 +1,6 @@
-# FaceFirst
+# Sentra
 
-> FaceFirst is a prototype for demonstration only. It is not a medical device and does not diagnose stroke. Commercial use would require clinical validation and FDA review.
+> Sentra is a prototype for demonstration only. It is not a medical device and does not diagnose stroke. Commercial use would require clinical validation and FDA review.
 
 A 60-second, escalate-only stroke-warning check (face, arm, speech) for caregivers and bystanders. It runs entirely in the browser. No video leaves the device.
 

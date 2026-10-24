@@ -23,7 +23,7 @@ describe('scaffold', () => {
 
   it('home disclaimer matches safety.md exactly in English', () => {
     expect(t('en', 'home.disclaimer')).toBe(
-      'FaceFirst is a prototype for demonstration only. It is not a medical device and does not diagnose stroke. Commercial use would require clinical validation and FDA review.'
+      'Sentra is a prototype for demonstration only. It is not a medical device and does not diagnose stroke. Commercial use would require clinical validation and FDA review.'
     );
   });
 

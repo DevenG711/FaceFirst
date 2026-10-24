@@ -3,7 +3,7 @@
     "call911": "Llamar al 911"
   },
   "home": {
-    "title": "FaceFirst",
+    "title": "Sentra",
     "languageName": "Español",
     "language": "Idioma",
     "tagline": "Una revisión de 60 segundos de señales de alerta de derrame cerebral.",
@@ -19,9 +19,9 @@
     "start": "Comenzar la revisión",
     "baseline": "Grabar una referencia",
     "voice": {
-      "welcome": "Bienvenido a FaceFirst. Si cree que alguien está teniendo un derrame cerebral, llame al 911 ahora. También puede tocar Comenzar la revisión."
+      "welcome": "Bienvenido a Sentra. Si cree que alguien está teniendo un derrame cerebral, llame al 911 ahora. También puede tocar Comenzar la revisión."
     },
-    "disclaimer": "FaceFirst es un prototipo solo para demostración. No es un dispositivo médico y no diagnostica derrames cerebrales. El uso comercial requeriría validación clínica y revisión de la FDA.",
+    "disclaimer": "Sentra es un prototipo solo para demostración. No es un dispositivo médico y no diagnostica derrames cerebrales. El uso comercial requeriría validación clínica y revisión de la FDA.",
     "headline": "Una revisión rápida de derrame cerebral.",
     "headlineEm": "Cerca de un minuto.",
     "sub": "Usa su cámara y su micrófono.",

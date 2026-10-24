@@ -1,6 +1,6 @@
 # Kiro Log
 
-A running journal of how we built FaceFirst with Kiro during Hackachusetts 2026. The `kiro-journal` hook appends an entry each time a spec task finishes, and we add manual entries for setup work. This file is the source for the Kiro write-up.
+A running journal of how we built Sentra (working name: FaceFirst) with Kiro during Hackachusetts 2026. The `kiro-journal` hook appends an entry each time a spec task finishes, and we add manual entries for setup work. This file is the source for the Kiro write-up.
 
 ## Kiro setup at a glance
 

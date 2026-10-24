@@ -3,7 +3,7 @@
     "call911": "Call 911"
   },
   "home": {
-    "title": "FaceFirst",
+    "title": "Sentra",
     "languageName": "English",
     "language": "Language",
     "tagline": "A 60-second stroke-warning check.",
@@ -19,9 +19,9 @@
     "start": "Start check",
     "baseline": "Record a baseline",
     "voice": {
-      "welcome": "Welcome to FaceFirst. If you think someone is having a stroke, call 911 now. You can also tap Start check."
+      "welcome": "Welcome to Sentra. If you think someone is having a stroke, call 911 now. You can also tap Start check."
     },
-    "disclaimer": "FaceFirst is a prototype for demonstration only. It is not a medical device and does not diagnose stroke. Commercial use would require clinical validation and FDA review.",
+    "disclaimer": "Sentra is a prototype for demonstration only. It is not a medical device and does not diagnose stroke. Commercial use would require clinical validation and FDA review.",
     "headline": "A quick stroke check.",
     "headlineEm": "About one minute.",
     "sub": "Uses your camera and microphone.",

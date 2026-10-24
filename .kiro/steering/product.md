@@ -2,11 +2,11 @@
 inclusion: always
 ---
 
-# Product: FaceFirst
+# Product: Sentra
 
 ## Pitch
 
-FaceFirst turns any phone or laptop into a 60-second stroke-warning check for caregivers and bystanders. It measures facial droop, arm drift, and speech using on-device computer vision, and it only ever pushes toward calling 911, never away from it.
+Sentra turns any phone or laptop into a 60-second stroke-warning check for caregivers and bystanders. It measures facial droop, arm drift, and speech using on-device computer vision, and it only ever pushes toward calling 911, never away from it.
 
 ## Context
 

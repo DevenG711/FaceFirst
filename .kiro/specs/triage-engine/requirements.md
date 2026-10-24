@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The triage engine is the safety-critical core of FaceFirst. It takes the results of the face, arm, and speech checks, the BE-FAST answers, caregiver observations, and an optional personal baseline, and returns exactly one of three escalate-only states: `CALL_911_NOW`, `CANNOT_RULE_OUT`, or `RETRY_CAPTURE`. It is a pure TypeScript module (`src/lib/triage/`) with no DOM access, and every safety rule below is verified with fast-check property-based tests.
+The triage engine is the safety-critical core of Sentra. It takes the results of the face, arm, and speech checks, the BE-FAST answers, caregiver observations, and an optional personal baseline, and returns exactly one of three escalate-only states: `CALL_911_NOW`, `CANNOT_RULE_OUT`, or `RETRY_CAPTURE`. It is a pure TypeScript module (`src/lib/triage/`) with no DOM access, and every safety rule below is verified with fast-check property-based tests.
 
 Requirements tagged **[PBT]** must be covered by a property-based test in `tests/triage.property.test.ts` or `tests/copy-safety.test.ts`.
 

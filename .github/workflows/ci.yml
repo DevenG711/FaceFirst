@@ -60,7 +60,7 @@ jobs:
         run: |
           git diff "origin/${{ github.base_ref }}...HEAD" > /tmp/pr.diff
           kiro-cli chat --v3 --no-interactive --trust-tools=read_file,grep_search \
-            "You are reviewing a pull request for FaceFirst, an escalate-only stroke-warning prototype. \
+            "You are reviewing a pull request for Sentra, an escalate-only stroke-warning prototype. \
           Read .kiro/steering/safety.md and the diff at /tmp/pr.diff. Report any change that could: \
           show reassuring copy (banned words), hide or delay the Call 911 button, add a triage state other than \
           CALL_911_NOW / CANNOT_RULE_OUT / RETRY_CAPTURE, let poor capture quality or a baseline lower urgency, \

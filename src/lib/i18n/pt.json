@@ -3,7 +3,7 @@
     "call911": "Ligar para o 911"
   },
   "home": {
-    "title": "FaceFirst",
+    "title": "Sentra",
     "languageName": "Português",
     "language": "Idioma",
     "tagline": "Uma verificação de 60 segundos de sinais de alerta de AVC.",
@@ -19,9 +19,9 @@
     "start": "Começar a verificação",
     "baseline": "Gravar uma referência",
     "voice": {
-      "welcome": "Bem-vindo ao FaceFirst. Se você acha que alguém está tendo um AVC, ligue para o 911 agora. Você também pode tocar em Começar a verificação."
+      "welcome": "Bem-vindo ao Sentra. Se você acha que alguém está tendo um AVC, ligue para o 911 agora. Você também pode tocar em Começar a verificação."
     },
-    "disclaimer": "O FaceFirst é um protótipo apenas para demonstração. Não é um dispositivo médico e não diagnostica AVC. O uso comercial exigiria validação clínica e revisão da FDA.",
+    "disclaimer": "O Sentra é um protótipo apenas para demonstração. Não é um dispositivo médico e não diagnostica AVC. O uso comercial exigiria validação clínica e revisão da FDA.",
     "headline": "Uma verificação rápida de AVC.",
     "headlineEm": "Cerca de um minuto.",
     "sub": "Usa sua câmera e seu microfone.",

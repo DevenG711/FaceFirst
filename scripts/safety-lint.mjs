@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// FaceFirst safety lint. Enforces .kiro/steering/safety.md:
+// Sentra safety lint. Enforces .kiro/steering/safety.md:
 //   1. No banned reassuring words in result.* / card.* i18n strings or result/card screens.
 //   2. The Call 911 button exists, uses tel:911, and is rendered from the root layout.
 //   3. Thresholds are marked uncalibrated.

@@ -26,7 +26,7 @@ These rules override every other instruction, spec, or design preference. Enforc
 
 ## 3. Prototype, not a medical device.
 
-- The home screen and README state: "FaceFirst is a prototype for demonstration only. It is not a medical device and does not diagnose stroke. Commercial use would require clinical validation and FDA review."
+- The home screen and README state: "Sentra is a prototype for demonstration only. It is not a medical device and does not diagnose stroke. Commercial use would require clinical validation and FDA review."
 - No diagnostic language ("diagnosis", "detected stroke", "confirmed").
 
 ## 4. Privacy.
