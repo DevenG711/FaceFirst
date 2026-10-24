@@ -9,6 +9,7 @@
   import CameraView from '#lib/components/CameraView.svelte';
   import { locale, setCheck, unavailableCheck } from '#lib/stores/session.ts';
   import { speak } from '#lib/voice.ts';
+  import type { CheckResult } from '#lib/triage/types.ts';
 
   let {
     id,
@@ -21,6 +22,9 @@
     duration?: number;
   } = $props();
 
+  // Arm drift needs a longer hold than the face check (QUALITY.MIN_ARM_FRAMES is higher).
+  const captureMs = $derived(duration ?? (id === 'arm' ? 10000 : 5000));
+
   let phase = $state<'ready' | 'checking' | 'done'>('ready');
 
   const instruct = () => speak(t($locale, `check.${id}.instructions`), $locale);
@@ -31,11 +35,10 @@
     instruct();
   }
 
-  function complete() {
-    // TODO(vision): store the measured score and side from lib/metrics (faceAsymmetry.ts /
-    // armDrift.ts). Until then the check records as unavailable, which can only make the
-    // result more cautious.
-    setCheck(unavailableCheck(id));
+  function complete(result: CheckResult) {
+    // Store the measured score and side from the vision layer. A poor_quality or unavailable
+    // result flows straight into the engine, which can only make the outcome MORE cautious.
+    setCheck(result);
     phase = 'done';
     setTimeout(() => goto(next), 1000);
   }
@@ -54,7 +57,7 @@
     guide={id}
     locale={$locale}
     active={phase === 'checking'}
-    {duration}
+    duration={captureMs}
     coaching={t($locale, phase === 'checking' ? 'check.coach.holdStill' : 'check.coach.faceCamera')}
     oncomplete={complete}
   />

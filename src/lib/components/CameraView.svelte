@@ -1,12 +1,15 @@
 <!--
   Camera shell for the face and arm checks: live selfie video, a framing guide, coaching
-  text and a progress bar. No vision yet; lib/vision will read frames from the video later.
-  The video is mirrored for display only. Sides are converted to anatomical left/right in
-  lib/metrics/geometry.ts, never here. The 911 button lives in +layout.svelte and is never
-  covered by this component.
+  text and a progress bar. During a capture it runs the vision layer (lib/vision) over the
+  live video and reports the measured CheckResult through `oncomplete`. The video is mirrored
+  for DISPLAY only; the pixels given to MediaPipe are not flipped, so sides stay anatomical
+  (lib/metrics/geometry.ts). The 911 button lives in +layout.svelte and is never covered here.
 -->
 <script lang="ts">
   import { t, type Locale } from '#lib/i18n/index.ts';
+  import { runCameraCheck } from '#lib/vision/index.ts';
+  import { unavailableCheck } from '#lib/stores/session.ts';
+  import type { CheckResult } from '#lib/triage/types.ts';
 
   type Status = 'idle' | 'starting' | 'running' | 'done' | 'denied' | 'unsupported';
 
@@ -26,7 +29,8 @@
     coaching?: string;
     /** How long the capture runs once the camera is streaming (ms). */
     duration?: number;
-    oncomplete?: () => void;
+    /** Called with the measured result once the capture finishes. */
+    oncomplete?: (result: CheckResult) => void;
     /** Camera permission denied or no camera API in this browser. */
     onunavailable?: () => void;
   } = $props();
@@ -38,9 +42,12 @@
 
   let stream: MediaStream | null = null;
   let timer: ReturnType<typeof setInterval> | undefined;
+  let abort: AbortController | null = null;
 
   function stop() {
     clearInterval(timer);
+    abort?.abort();
+    abort = null;
     stream?.getTracks().forEach((track) => track.stop());
     stream = null;
   }
@@ -69,13 +76,22 @@
     await video.play().catch(() => {});
     status = 'running';
 
+    // Run detection over the capture window; the controller stops it when the bar fills.
+    abort = new AbortController();
+    const checkPromise = runCameraCheck(guide, video, abort.signal, () => unavailableCheck(guide));
+
     const startedAt = performance.now();
     timer = setInterval(() => {
       progress = Math.min(1, (performance.now() - startedAt) / duration);
       if (progress < 1) return;
-      stop();
+      clearInterval(timer);
+      abort?.abort(); // ends frame collection; the metric runs on what we gathered
       status = 'done';
-      oncomplete?.();
+      void checkPromise.then((result) => {
+        stream?.getTracks().forEach((track) => track.stop());
+        stream = null;
+        oncomplete?.(result);
+      });
     }, 100);
   }
 
