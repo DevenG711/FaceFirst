@@ -7,11 +7,13 @@
 -->
 <script lang="ts">
   import { t, type Locale } from '#lib/i18n/index.ts';
-  import { runCameraCheck } from '#lib/vision/index.ts';
+  import FaceGuide from '#lib/components/FaceGuide.svelte';
+  import { runCameraCheck, waitForFit, type FitHint } from '#lib/vision/index.ts';
   import { unavailableCheck } from '#lib/stores/session.ts';
   import type { CheckResult } from '#lib/triage/types.ts';
 
-  type Status = 'idle' | 'starting' | 'running' | 'done' | 'denied' | 'unsupported';
+  // 'fitting': camera is live but the timer waits (arm: until framed; face: until smiling).
+  type Status = 'idle' | 'starting' | 'fitting' | 'running' | 'done' | 'denied' | 'unsupported';
 
   let {
     guide,
@@ -21,6 +23,7 @@
     duration = 5000,
     oncomplete,
     onunavailable,
+    onfit,
   }: {
     guide: 'face' | 'arm';
     locale: Locale;
@@ -33,7 +36,11 @@
     oncomplete?: (result: CheckResult) => void;
     /** Camera permission denied or no camera API in this browser. */
     onunavailable?: () => void;
+    /** Called right before the timer starts: `fit` = ready, `timeout` = face never smiled, recording anyway. */
+    onfit?: (outcome: 'fit' | 'timeout') => void;
   } = $props();
+
+  let fitHint = $state<FitHint>('shoulders');
 
   let video: HTMLVideoElement | undefined = $state();
   let canvas: HTMLCanvasElement | undefined = $state();
@@ -62,7 +69,11 @@
     progress = 0;
     try {
       stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user' },
+        // The arm check needs a wide frame (both arms held out); the face check is portrait.
+        video:
+          guide === 'arm'
+            ? { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
+            : { facingMode: 'user' },
         audio: false,
       });
     } catch {
@@ -74,6 +85,22 @@
 
     video.srcObject = stream;
     await video.play().catch(() => {});
+
+    // Pre-capture gate. Arm: wait until both shoulders and both wrists are in view. Face: wait until
+    // they smile (or give up after QUALITY.FACE_SMILE_WAIT_MS and record anyway, so someone who
+    // cannot smile is still measured). Skip and the 911 button stay available the whole time.
+    status = 'fitting';
+    fitHint = guide === 'arm' ? 'shoulders' : 'face';
+    abort = new AbortController();
+    const fit = await waitForFit(guide, video, abort.signal, (h) => (fitHint = h));
+    if (fit === 'aborted' || !active) return;
+    if (fit === 'error') {
+      stop();
+      status = 'done';
+      oncomplete?.(unavailableCheck(guide));
+      return;
+    }
+    onfit?.(fit);
     status = 'running';
 
     // Run detection over the capture window; the controller stops it when the bar fills.
@@ -101,13 +128,16 @@
     return stop;
   });
 
+  const secondsLeft = $derived(Math.max(0, Math.ceil(((1 - progress) * duration) / 1000)));
+
   function drawGuide(ctx: CanvasRenderingContext2D, w: number, h: number) {
     ctx.clearRect(0, 0, w, h);
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 4;
-    ctx.setLineDash([14, 10]);
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-    ctx.shadowBlur = 4;
+    ctx.strokeStyle = getComputedStyle(ctx.canvas).getPropertyValue('--color-accent').trim() || '#d9c49b';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.setLineDash([2, 9]);
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+    ctx.shadowBlur = 3;
     ctx.beginPath();
     if (guide === 'face') {
       const rx = Math.min(w, h) * 0.3;
@@ -150,30 +180,63 @@
 
 <div class="camera-view">
   {#if status === 'denied' || status === 'unsupported'}
-    <p class="fallback" role="alert">{t(locale, `check.camera.${status}`)}</p>
+    <p class="panel fallback" role="alert">{t(locale, `check.camera.${status}`)}</p>
   {:else}
-    <div class="stage" role="group" aria-label={t(locale, 'check.camera.label')}>
+    <!-- Live while fitting too: the person has to see themselves to get framed / start smiling. -->
+    <div
+      class="panel stage"
+      class:live={status === 'fitting' || status === 'running' || status === 'done'}
+      class:wide={guide === 'arm'}
+      role="group"
+      aria-label={t(locale, 'check.camera.label')}
+    >
       <!-- svelte-ignore a11y_media_has_caption -- live camera preview, no audio -->
       <video bind:this={video} playsinline muted></video>
       <canvas bind:this={canvas} aria-hidden="true"></canvas>
+
+      {#if status === 'idle' || status === 'starting'}
+        <div class="placeholder" aria-hidden="true">
+          {#if guide === 'face'}
+            <FaceGuide />
+          {:else}
+            <svg class="body-guide" viewBox="0 0 300 300" fill="none">
+              <g stroke="var(--color-accent)" stroke-width="1.5" stroke-dasharray="2 7" stroke-linecap="round">
+                <circle cx="150" cy="70" r="34" />
+                <path d="M100 300 V130 H200 V300" />
+                <path d="M100 142 H20 M200 142 H280" />
+              </g>
+            </svg>
+          {/if}
+        </div>
+      {/if}
+
       {#if status === 'starting'}
-        <p class="coaching" aria-live="polite">{t(locale, 'check.camera.starting')}</p>
+        <p class="pill status" aria-live="polite">
+          <span class="dot pulse"></span>{t(locale, 'check.camera.starting')}
+        </p>
+      {:else if status === 'fitting'}
+        <p class="pill status" aria-live="polite">{t(locale, `check.coach.${guide}.${fitHint}`)}</p>
       {:else if coaching}
-        <p class="coaching" aria-live="polite">{coaching}</p>
+        <p class="pill status" aria-live="polite">
+          {#if status === 'running'}<span class="dot pulse"></span>{/if}
+          {coaching}
+          {#if status === 'running'}<span class="count" aria-hidden="true">{secondsLeft}</span>{/if}
+        </p>
+      {/if}
+
+      {#if status === 'running' || status === 'done'}
+        <div
+          class="progress"
+          role="progressbar"
+          aria-label={t(locale, 'check.camera.progress')}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(progress * 100)}
+        >
+          <div class="fill" style:width="{progress * 100}%"></div>
+        </div>
       {/if}
     </div>
-    {#if status === 'running' || status === 'done'}
-      <div
-        class="progress"
-        role="progressbar"
-        aria-label={t(locale, 'check.camera.progress')}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={Math.round(progress * 100)}
-      >
-        <div class="fill" style:width="{progress * 100}%"></div>
-      </div>
-    {/if}
   {/if}
 </div>
 
@@ -181,11 +244,14 @@
   .stage {
     position: relative;
     width: 100%;
-    aspect-ratio: 3 / 4;
-    max-height: 60dvh;
+    height: 460px;
+    max-height: 62dvh;
     overflow: hidden;
-    border-radius: 8px;
-    background: #222222;
+  }
+
+  /* The arm check needs a wide frame so both outstretched arms and the shoulders fit. */
+  .stage.wide {
+    aspect-ratio: 4 / 3;
   }
 
   video,
@@ -199,43 +265,66 @@
   video {
     object-fit: cover;
     transform: scaleX(-1); /* selfie view; display only */
+    opacity: 0;
   }
 
-  .coaching {
+  .stage.live video {
+    opacity: 1;
+  }
+
+  /* The drawn guide only goes over live video; before that the placeholder drawing shows. */
+  .stage:not(.live) canvas {
+    display: none;
+  }
+
+  .placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .body-guide {
+    width: min(300px, 75%);
+    height: auto;
+  }
+
+  .status {
+    position: absolute;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    margin: 0;
+    max-width: calc(100% - 32px);
+    text-align: center;
+  }
+
+  .count {
+    font-variant-numeric: tabular-nums;
+    color: var(--color-accent);
+  }
+
+  /* Accent line along the bottom edge; never green (.kiro/steering/design.md). */
+  .progress {
     position: absolute;
     left: 0;
     right: 0;
     bottom: 0;
-    margin: 0;
-    padding: 0.75rem 1rem;
-    background: rgba(0, 0, 0, 0.75);
-    color: #ffffff;
-    font-size: 24px;
-    font-weight: 700;
-    text-align: center;
-  }
-
-  /* Neutral gray, never green (.kiro/steering/design.md). */
-  .progress {
-    height: 16px;
-    margin-top: 0.75rem;
-    border-radius: 8px;
-    background: #e0e0e0;
-    overflow: hidden;
+    height: 6px;
+    background: var(--color-line);
   }
 
   .fill {
     height: 100%;
-    background: #555555;
+    background: var(--color-accent);
   }
 
   .fallback {
     margin: 0;
-    padding: 1rem;
-    border: 3px solid var(--color-caution);
-    border-radius: 8px;
-    background: var(--color-bg);
+    padding: 32px;
+    border-color: var(--color-caution);
     color: var(--color-fg);
-    font-weight: 700;
+    font-size: 1.15rem;
   }
 </style>

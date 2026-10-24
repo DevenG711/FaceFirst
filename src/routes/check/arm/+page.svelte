@@ -2,5 +2,5 @@
   import CameraCheck from '#lib/components/CameraCheck.svelte';
 </script>
 
-<!-- Arm drift needs longer than the face check to show. -->
-<CameraCheck id="arm" next="/check/speech" duration={10000} step={2} />
+<!-- Main flow step 2. Arm drift needs a longer hold than the face check. -->
+<CameraCheck id="arm" next="/check/speech" back="/check/face" duration={10000} step={2} />

@@ -21,7 +21,11 @@
     "voice": {
       "welcome": "Bienvenido a FaceFirst. Si cree que alguien está teniendo un derrame cerebral, llame al 911 ahora. También puede tocar Comenzar la revisión."
     },
-    "disclaimer": "FaceFirst es un prototipo solo para demostración. No es un dispositivo médico y no diagnostica derrames cerebrales. El uso comercial requeriría validación clínica y revisión de la FDA."
+    "disclaimer": "FaceFirst es un prototipo solo para demostración. No es un dispositivo médico y no diagnostica derrames cerebrales. El uso comercial requeriría validación clínica y revisión de la FDA.",
+    "headline": "Una revisión rápida de derrame cerebral.",
+    "headlineEm": "Cerca de un minuto.",
+    "sub": "Usa su cámara y su micrófono.",
+    "optional": "Opcional"
   },
   "check": {
     "common": {
@@ -29,13 +33,25 @@
       "complete": "Revisión terminada",
       "skip": "Saltar esta revisión",
       "next": "Siguiente",
-      "step": "Paso {n} de {total}"
+      "step": "Paso {n} de {total}",
+      "back": "Atrás",
+      "seeResult": "Ver el resultado"
     },
     "coach": {
       "moveCloser": "Acérquese más",
       "faceCamera": "Mire hacia la cámara",
       "moreLight": "Necesita más luz",
-      "holdStill": "Quédese quieto"
+      "holdStill": "Quédese quieto",
+      "arm": {
+        "shoulders": "Retroceda para que se vean los dos hombros",
+        "wrists": "Extienda los dos brazos al frente",
+        "ready": "Bien, quédese quieto"
+      },
+      "face": {
+        "face": "Ponga su cara dentro del óvalo",
+        "smile": "Sonría ampliamente ahora",
+        "ready": "Bien, siga sonriendo"
+      }
     },
     "camera": {
       "label": "Vista de la cámara",
@@ -46,22 +62,28 @@
     },
     "face": {
       "title": "Revisión de la cara",
-      "instructions": "Mire a la cámara y sonría ampliamente. Revisaremos si un lado de la cara se cae.",
-      "start": "Comenzar la revisión de la cara"
+      "instructions": "Sonría ampliamente y muestre los dientes. Mire a la cámara. La revisión empieza cuando sonría. Revisaremos si un lado de la cara se cae.",
+      "start": "Comenzar la revisión de la cara",
+      "headline": "Sonría ampliamente",
+      "headlineEm": "y muestre los dientes."
     },
     "arm": {
       "title": "Revisión de los brazos",
       "instructions": "Extienda ambos brazos hacia adelante, con las palmas hacia arriba. Manténgalos así. Revisaremos si un brazo baja.",
-      "start": "Comenzar la revisión de los brazos"
+      "start": "Comenzar la revisión de los brazos",
+      "headline": "Extienda ambos brazos",
+      "headlineEm": "hacia adelante."
     },
     "speech": {
       "title": "Revisión del habla",
       "instructions": "Pídale que lea esta frase en voz alta:",
-      "phrase": "El cielo está azul hoy.",
+      "phrase": "A perro viejo no se le enseñan trucos nuevos.",
       "start": "Toque y hable",
-      "listening": "Escuchando…",
+      "listening": "Escuchando… tómese su tiempo.",
+      "done": "Terminé de hablar",
       "heard": "Escuchamos:",
       "noSpeech": "No escuchamos nada. Intente de nuevo o responda la pregunta de abajo.",
+      "unclear": "No pudimos obtener una grabación clara. Intente de nuevo o responda la pregunta de abajo.",
       "micDenied": "No podemos usar el micrófono. Responda la pregunta de abajo.",
       "unsupported": "Este navegador no puede escuchar el habla. Responda la pregunta de abajo.",
       "disclosure": "El reconocimiento de voz de Chrome envía el audio a los servidores de Google.",
@@ -70,7 +92,9 @@
         "slurred": "Habla arrastrada o confusa",
         "noChange": "No noto ningún cambio",
         "notSure": "No estoy seguro"
-      }
+      },
+      "headline": "Diga esto",
+      "headlineEm": "en voz alta."
     },
     "befast": {
       "title": "Algunas preguntas rápidas",
@@ -92,7 +116,7 @@
   "result": {
     "call911Line": "Si notó síntomas repentinos, llame al 911.",
     "call911": {
-      "title": "LLAME AL 911 AHORA",
+      "title": "Llame al 911 ahora.",
       "body": "Se encontraron señales de advertencia de un derrame cerebral: {reasons}. Anote la hora en que comenzaron los síntomas."
     },
     "cannotRuleOut": {
@@ -134,14 +158,37 @@
         "arm_weak": "alguien informa que el brazo está débil",
         "speech_wrong": "alguien informa que el habla no es clara"
       }
-    }
+    },
+    "status": {
+      "act": "Posibles señales de derrame cerebral",
+      "caution": "No se descarta un derrame cerebral",
+      "retry": "Algunas lecturas no fueron claras"
+    },
+    "finding": {
+      "face": "Cara",
+      "arm": "Brazo",
+      "speech": "Voz"
+    },
+    "tag": {
+      "flagged": "Marcado",
+      "notFlagged": "No marcado",
+      "retry": "Repetir",
+      "notChecked": "No revisado"
+    },
+    "timeNoticed": "Hora en que lo notó",
+    "checkedAt": "Revisado a las",
+    "notDiagnosis": "Esta revisión no diagnostica derrames cerebrales.",
+    "checkAgain": "Revisar de nuevo",
+    "moreQuestions": "Responder algunas preguntas",
+    "retryCheck": "Repetir: {check}",
+    "close": "Cerrar"
   },
   "baseline": {
     "title": "Grabar una referencia",
-    "intro": "Grabe ahora un video corto de su ser querido mientras está sano. Más tarde, una prueba puede compararlo con su propio movimiento normal de rostro y brazos.",
+    "intro": "Grabe un video corto de su ser querido en un día cualquiera. Después, una revisión puede compararlo con su forma habitual de mover la cara y los brazos.",
     "note": "No se sube nada. La grabación permanece en este dispositivo.",
     "start": "Comenzar a grabar",
     "back": "Volver al inicio",
-    "voice": "Grabe ahora un video corto estando sano. Permanece en este dispositivo y nunca se sube."
+    "voice": "Grabe un video corto en un día cualquiera. Se queda en este dispositivo y nunca se sube."
   }
 }

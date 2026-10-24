@@ -21,7 +21,11 @@
     "voice": {
       "welcome": "Bem-vindo ao FaceFirst. Se você acha que alguém está tendo um AVC, ligue para o 911 agora. Você também pode tocar em Começar a verificação."
     },
-    "disclaimer": "O FaceFirst é um protótipo apenas para demonstração. Não é um dispositivo médico e não diagnostica AVC. O uso comercial exigiria validação clínica e revisão da FDA."
+    "disclaimer": "O FaceFirst é um protótipo apenas para demonstração. Não é um dispositivo médico e não diagnostica AVC. O uso comercial exigiria validação clínica e revisão da FDA.",
+    "headline": "Uma verificação rápida de AVC.",
+    "headlineEm": "Cerca de um minuto.",
+    "sub": "Usa sua câmera e seu microfone.",
+    "optional": "Opcional"
   },
   "check": {
     "common": {
@@ -29,13 +33,25 @@
       "complete": "Verificação concluída",
       "skip": "Pular esta verificação",
       "next": "Próximo",
-      "step": "Etapa {n} de {total}"
+      "step": "Etapa {n} de {total}",
+      "back": "Voltar",
+      "seeResult": "Ver o resultado"
     },
     "coach": {
       "moveCloser": "Chegue mais perto",
       "faceCamera": "Olhe para a câmera",
       "moreLight": "Precisa de mais luz",
-      "holdStill": "Fique parado"
+      "holdStill": "Fique parado",
+      "arm": {
+        "shoulders": "Dê um passo para trás para mostrar os dois ombros",
+        "wrists": "Estique os dois braços à frente",
+        "ready": "Ótimo, fique parado"
+      },
+      "face": {
+        "face": "Coloque o rosto dentro do oval",
+        "smile": "Dê um grande sorriso agora",
+        "ready": "Ótimo, continue sorrindo"
+      }
     },
     "camera": {
       "label": "Visualização da câmera",
@@ -46,22 +62,28 @@
     },
     "face": {
       "title": "Verificação do rosto",
-      "instructions": "Olhe para a câmera e dê um grande sorriso. Vamos verificar se um lado do rosto está caído.",
-      "start": "Começar a verificação do rosto"
+      "instructions": "Dê um grande sorriso mostrando os dentes. Olhe para a câmera. A verificação começa quando você sorrir. Vamos verificar se um lado do rosto está caído.",
+      "start": "Começar a verificação do rosto",
+      "headline": "Dê um grande sorriso",
+      "headlineEm": "mostrando os dentes."
     },
     "arm": {
       "title": "Verificação dos braços",
       "instructions": "Estenda os dois braços para a frente, com as palmas para cima. Mantenha-os assim. Vamos verificar se um braço cai.",
-      "start": "Começar a verificação dos braços"
+      "start": "Começar a verificação dos braços",
+      "headline": "Estenda os dois braços",
+      "headlineEm": "para a frente."
     },
     "speech": {
       "title": "Verificação da fala",
       "instructions": "Peça para a pessoa ler esta frase em voz alta:",
-      "phrase": "O céu está azul hoje.",
+      "phrase": "Não se ensina truques novos a um cachorro velho.",
       "start": "Toque e fale",
-      "listening": "Ouvindo…",
+      "listening": "Ouvindo… não tenha pressa.",
+      "done": "Terminei de falar",
       "heard": "Ouvimos:",
       "noSpeech": "Não ouvimos nada. Tente de novo ou responda à pergunta abaixo.",
+      "unclear": "Não conseguimos uma gravação clara. Tente de novo ou responda à pergunta abaixo.",
       "micDenied": "Não conseguimos usar o microfone. Responda à pergunta abaixo.",
       "unsupported": "Este navegador não consegue ouvir a fala. Responda à pergunta abaixo.",
       "disclosure": "O reconhecimento de voz do Chrome envia o áudio para os servidores do Google.",
@@ -70,7 +92,9 @@
         "slurred": "Fala arrastada ou confusa",
         "noChange": "Não percebo nenhuma mudança",
         "notSure": "Não tenho certeza"
-      }
+      },
+      "headline": "Diga isto",
+      "headlineEm": "em voz alta."
     },
     "befast": {
       "title": "Algumas perguntas rápidas",
@@ -92,7 +116,7 @@
   "result": {
     "call911Line": "Se você notou sintomas repentinos, ligue para o 911.",
     "call911": {
-      "title": "LIGUE PARA O 911 AGORA",
+      "title": "Ligue para o 911 agora.",
       "body": "Foram encontrados sinais de alerta de AVC: {reasons}. Anote a hora em que os sintomas começaram."
     },
     "cannotRuleOut": {
@@ -134,14 +158,37 @@
         "arm_weak": "alguém relata braço fraco",
         "speech_wrong": "alguém relata fala pouco clara"
       }
-    }
+    },
+    "status": {
+      "act": "Possíveis sinais de AVC",
+      "caution": "AVC não descartado",
+      "retry": "Algumas leituras não ficaram claras"
+    },
+    "finding": {
+      "face": "Rosto",
+      "arm": "Braço",
+      "speech": "Voz"
+    },
+    "tag": {
+      "flagged": "Marcado",
+      "notFlagged": "Não marcado",
+      "retry": "Repetir",
+      "notChecked": "Não verificado"
+    },
+    "timeNoticed": "Hora em que notou",
+    "checkedAt": "Verificado às",
+    "notDiagnosis": "Esta verificação não diagnostica AVC.",
+    "checkAgain": "Verificar de novo",
+    "moreQuestions": "Responder algumas perguntas",
+    "retryCheck": "Repetir: {check}",
+    "close": "Fechar"
   },
   "baseline": {
     "title": "Gravar uma referência",
-    "intro": "Grave agora um vídeo curto do seu ente querido enquanto está saudável. Depois, uma verificação pode comparar com o movimento normal do próprio rosto e braços.",
+    "intro": "Grave um vídeo curto do seu familiar em um dia comum. Depois, uma verificação pode comparar com o jeito habitual de mexer o rosto e os braços.",
     "note": "Nada é enviado. A gravação permanece neste dispositivo.",
     "start": "Começar a gravar",
     "back": "Voltar ao início",
-    "voice": "Grave agora um vídeo curto estando saudável. Ele permanece neste dispositivo e nunca é enviado."
+    "voice": "Grave um vídeo curto em um dia comum. Ele fica neste aparelho e nunca é enviado."
   }
 }
