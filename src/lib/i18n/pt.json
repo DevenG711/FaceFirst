@@ -1,0 +1,9 @@
+{
+  "nav": {
+    "call911": "Ligar para o 911"
+  },
+  "home": {
+    "title": "FaceFirst",
+    "disclaimer": "O FaceFirst é um protótipo apenas para demonstração. Não é um dispositivo médico e não diagnostica AVC. O uso comercial exigiria validação clínica e revisão da FDA."
+  }
+}

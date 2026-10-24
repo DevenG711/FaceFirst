@@ -1,6 +1,6 @@
 # Implementation Plan: Triage Engine
 
-- [ ] 1. Set up test tooling
+- [x] 1. Set up test tooling
   - Add exact-pinned `vitest` and `fast-check` dev dependencies; add `"test": "vitest --run"` script.
   - Configure Vitest to include `tests/**/*.test.ts`.
   - _Requirements: 1.1_

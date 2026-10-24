@@ -1,0 +1,9 @@
+{
+  "nav": {
+    "call911": "Llamar al 911"
+  },
+  "home": {
+    "title": "FaceFirst",
+    "disclaimer": "FaceFirst es un prototipo solo para demostración. No es un dispositivo médico y no diagnostica derrames cerebrales. El uso comercial requeriría validación clínica y revisión de la FDA."
+  }
+}

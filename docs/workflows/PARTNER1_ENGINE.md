@@ -8,6 +8,8 @@
 
 ## Step 0 — Manual setup (no AI, ~5 min)
 
+> **Done (superseded).** The full SvelteKit 3 scaffold is on `main`, with `package.json` covering both partners and the Vitest config in `vite.config.ts` (there is no `vitest.config.ts`). See the README's "Stack notes". The original instructions are kept below for reference only.
+
 Before using any Kiro credits, set up the test tooling yourself. This is pure boilerplate.
 
 1. Create `package.json` with `vitest` and `fast-check` as dev dependencies (pin exact versions, not ranges). Run:
