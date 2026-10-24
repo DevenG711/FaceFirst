@@ -33,7 +33,7 @@
     - _Requirements: 5.3_
 
 - [ ] 5. Result copy
-  - [ ] 5.1 Create `src/lib/triage/bannedWords.ts` with per-locale banned lists from `safety.md` and a `findBannedWords(text, locale)` whole-word matcher.
+  - [ ] 5.1 Create `src/lib/triage/bannedWords.ts` that imports the existing `bannedWords.json` and exports a `findBannedWords(text, locale)` Unicode whole-word matcher (same semantics as `scripts/safety-lint.mjs`).
     - _Requirements: 7.1_
   - [ ] 5.2 Add `result.*` keys to `src/lib/i18n/en.json`, `es.json`, `pt.json` (three states, reasons, retry, re-check in 5 minutes).
     - _Requirements: 7.2, 7.3, 7.4_

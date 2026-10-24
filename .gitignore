@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# SvelteKit / Vite build output
+.svelte-kit/
+build/
+dist/
+.vite/
+coverage/
+
+# Vercel
+.vercel/
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+
+# Playwright MCP / test artifacts
+.playwright-mcp/
+test-results/
+playwright-report/
+
+# OS / editor
+.DS_Store
+*.log
+
+# NOTE: .kiro/ must NEVER be ignored (hackathon requirement). scripts/safety-lint.mjs enforces this.

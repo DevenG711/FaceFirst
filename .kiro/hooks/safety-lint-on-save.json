@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Safety copy lint on save",
+      "trigger": "PostFileSave",
+      "description": "When a .svelte or i18n JSON file is saved, scan for banned reassuring words, green on result screens, and a missing 911 button.",
+      "matcher": "(\\.svelte$|src/lib/i18n/.*\\.json$|bannedWords\\.json$|thresholds\\.ts$|\\.gitignore$)",
+      "action": {
+        "type": "command",
+        "command": "node scripts/safety-lint.mjs",
+        "timeout": 30
+      }
+    }
+  ]
+}

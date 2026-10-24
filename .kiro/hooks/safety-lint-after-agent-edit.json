@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Safety copy lint after agent edits",
+      "trigger": "PostToolUse",
+      "description": "After the agent writes or edits any file, run the safety lint so agent-authored copy is held to the same rules as human edits.",
+      "matcher": "^(fs_write|str_replace|fs_append)$",
+      "action": {
+        "type": "command",
+        "command": "node scripts/safety-lint.mjs",
+        "timeout": 30
+      }
+    }
+  ]
+}

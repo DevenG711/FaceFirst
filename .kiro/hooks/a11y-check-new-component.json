@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Accessibility check on new component",
+      "trigger": "PostFileCreate",
+      "description": "When a new .svelte file is created, review it against design.md accessibility rules.",
+      "matcher": "\\.svelte$",
+      "action": {
+        "type": "agent",
+        "prompt": "A new Svelte component was created. Review it against .kiro/steering/design.md and safety.md and fix issues directly: (1) text/background contrast meets WCAG 2.2 AA using the design color tokens, no green on result/card screens; (2) every button, input, and icon has an accessible name; (3) tap targets ≥ 56×56px; (4) visible focus styles, no bare outline:none; (5) the root layout's Call 911 link stays first in tab order and is not covered or hidden by this component; (6) animations are disabled under prefers-reduced-motion; (7) all copy comes from src/lib/i18n, not hard-coded. Report what you changed in 3–5 bullets. Note that automated review does not replace testing with assistive technologies."
+      }
+    }
+  ]
+}

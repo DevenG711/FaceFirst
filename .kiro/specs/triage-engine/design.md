@@ -139,4 +139,4 @@ Copy safety (`tests/copy-safety.test.ts`):
 - C3 (example): every key under `result.*` and `card.*` in all three JSON files passes the banned-word scan; all keys in `en.json` exist in `es.json` and `pt.json`.
 - C4 (example): a deliberately bad string ("You're fine") is caught, proving the scanner works.
 
-Banned-word lists live in `src/lib/triage/bannedWords.ts` so the test and the safety-lint hook share one source.
+Banned-word lists live in `src/lib/triage/bannedWords.json` (already created). `bannedWords.ts` imports it and exports `findBannedWords()`; the zero-dependency `scripts/safety-lint.mjs` (used by the safety-lint hook and CI) reads the same JSON, so there is one source of truth. Matching is Unicode-aware whole-word with curly apostrophes normalized to `'`.

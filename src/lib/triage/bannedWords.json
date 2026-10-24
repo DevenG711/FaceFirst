@@ -1,0 +1,6 @@
+{
+  "_comment": "Single source of truth for reassuring words banned from result.* / card.* copy and result/card screens. Used by src/lib/triage/bannedWords.ts, tests/copy-safety.test.ts, and scripts/safety-lint.mjs. See .kiro/steering/safety.md.",
+  "en": ["normal", "no stroke", "you're fine", "you are fine", "healthy", "all clear", "negative"],
+  "es": ["normal", "sin derrame", "estás bien", "sano", "todo bien", "negativo"],
+  "pt": ["normal", "sem AVC", "você está bem", "saudável", "tudo bem", "negativo"]
+}

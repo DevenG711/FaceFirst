@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Translation sync",
+      "trigger": "PostFileSave",
+      "description": "When en.json changes, add any new or changed keys to es.json and pt.json.",
+      "matcher": "src/lib/i18n/en\\.json$",
+      "action": {
+        "type": "agent",
+        "prompt": "src/lib/i18n/en.json was just saved. Sync translations: compare its keys with src/lib/i18n/es.json and src/lib/i18n/pt.json. For every key that is missing or whose English text changed, write a natural translation (Spanish for es.json, Brazilian Portuguese for pt.json) at a grade-6 reading level. Remove keys no longer in en.json. Preserve key order and {placeholders} exactly. Follow safety.md: result.* and card.* strings must not contain any word from src/lib/triage/bannedWords.json for that locale. Then run `node scripts/safety-lint.mjs` and fix anything it reports. Do not change en.json."
+      }
+    }
+  ]
+}

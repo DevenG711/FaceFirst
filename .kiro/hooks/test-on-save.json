@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Property tests on save",
+      "trigger": "PostFileSave",
+      "description": "When a metrics or triage source file is saved, run the fast-check property tests once.",
+      "matcher": "src/lib/(metrics|triage)/.*\\.ts$",
+      "action": {
+        "type": "command",
+        "command": "npx vitest --run tests/ --reporter=dot",
+        "timeout": 120
+      }
+    }
+  ]
+}
