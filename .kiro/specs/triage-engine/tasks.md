@@ -32,20 +32,20 @@
   - [x] 4.6 P8: adding a baseline never lowers urgency.
     - _Requirements: 5.3_
 
-- [ ] 5. Result copy
-  - [ ] 5.1 Create `src/lib/triage/bannedWords.ts` that imports the existing `bannedWords.json` and exports a `findBannedWords(text, locale)` Unicode whole-word matcher (same semantics as `scripts/safety-lint.mjs`).
+- [x] 5. Result copy
+  - [x] 5.1 Create `src/lib/triage/bannedWords.ts` that imports the existing `bannedWords.json` and exports a `findBannedWords(text, locale)` Unicode whole-word matcher (same semantics as `scripts/safety-lint.mjs`).
     - _Requirements: 7.1_
-  - [ ] 5.2 Add `result.*` keys to `src/lib/i18n/en.json`, `es.json`, `pt.json` (three states, reasons, retry, re-check in 5 minutes).
+  - [x] 5.2 Add `result.*` keys to `src/lib/i18n/en.json`, `es.json`, `pt.json` (three states, reasons, retry, untimed re-check, call-911 line, sided reasons).
     - _Requirements: 7.2, 7.3, 7.4_
-  - [ ] 5.3 Implement `resultCopy(result, locale)` in `src/lib/triage/copy.ts`.
+  - [x] 5.3 Implement `resultCopy(result, locale)` in `src/lib/triage/copy.ts`.
     - _Requirements: 7.1–7.4_
 
-- [ ] 6. Copy-safety tests (`tests/copy-safety.test.ts`)
-  - [ ] 6.1 C1 [PBT]: random input × locale → resolved copy has no banned words.
-  - [ ] 6.2 C2 [PBT]: CANNOT_RULE_OUT and RETRY_CAPTURE copy contains the localized call-911 line.
-  - [ ] 6.3 C3: all `result.*` / `card.*` keys pass the scan; es/pt have every en key.
-  - [ ] 6.4 C4: scanner catches a planted "You're fine" and ignores "abnormal".
+- [x] 6. Copy-safety tests (`tests/copy-safety.test.ts`)
+  - [x] 6.1 C1 [PBT]: random input × locale → resolved copy has no banned words.
+  - [x] 6.2 C2 [PBT]: CANNOT_RULE_OUT and RETRY_CAPTURE copy contains the localized call-911 line.
+  - [x] 6.3 C3: all `result.*` / `card.*` keys pass the scan; es/pt have every en key.
+  - [x] 6.4 C4: scanner catches a planted "You're fine" and ignores "abnormal".
   - _Requirements: 7.1, 7.2, 7.4_
 
-- [ ] 7. Checkpoint
+- [x] 7. Checkpoint
   - Run `npx vitest --run`; all engine and copy-safety tests pass. Log the result in `docs/KIRO_LOG.md`.

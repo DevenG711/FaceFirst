@@ -86,7 +86,7 @@ Requirements tagged **[PBT]** must be covered by a property-based test in `tests
 
 1. FOR every possible triage output and every supported locale (en, es, pt) THE SYSTEM SHALL produce copy that contains none of the banned words in `safety.md` (whole-word, case-insensitive). **[PBT]**
 2. WHEN `CANNOT_RULE_OUT` is returned THE SYSTEM SHALL include the copy "This check cannot rule out a stroke. If you noticed sudden symptoms, call 911." (localized). **[PBT]**
-3. WHEN `CANNOT_RULE_OUT` is returned THE SYSTEM SHALL offer a "Re-check in 5 minutes" action.
+3. WHEN `CANNOT_RULE_OUT` is returned THE SYSTEM SHALL offer an untimed "run this check again" action that also says not to wait and to call 911. It SHALL NOT offer a timed re-check (e.g. "in 5 minutes"), because that suggests waiting (`safety.md` §2).
 4. WHEN `RETRY_CAPTURE` is returned THE SYSTEM SHALL include the "If you noticed sudden symptoms, call 911" line. **[PBT]**
 5. THE SYSTEM SHALL set `show911: true` on every triage result. **[PBT]**
 6. THE SYSTEM SHALL map `CALL_911_NOW` to the `act` (red) color token and both other states to the `caution` (amber) color token, and SHALL NOT map any state to green. **[PBT]**

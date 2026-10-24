@@ -7,29 +7,38 @@
     "disclaimer": "FaceFirst es un prototipo solo para demostración. No es un dispositivo médico y no diagnostica derrames cerebrales. El uso comercial requeriría validación clínica y revisión de la FDA."
   },
   "result": {
+    "call911Line": "Si notó síntomas repentinos, llame al 911.",
     "call911": {
       "title": "LLAME AL 911 AHORA",
       "body": "Se encontraron señales de advertencia de un derrame cerebral: {reasons}. Anote la hora en que comenzaron los síntomas."
     },
     "cannotRuleOut": {
       "title": "No podemos descartar un derrame cerebral",
-      "body": "Esta prueba no puede descartar un derrame cerebral. Si notó síntomas repentinos, llame al 911.",
+      "body": "Esta prueba no puede descartar un derrame cerebral.",
       "recheck": "Puede repetir esta prueba en cualquier momento. No espere si tiene síntomas. Llame al 911."
     },
     "retry": {
       "title": "No pudimos obtener una lectura clara",
-      "body": "Intente de nuevo: {checks}. Si notó síntomas repentinos, llame al 911."
+      "body": "Intente de nuevo: {checks}."
     },
     "check": {
       "face": "prueba del rostro",
       "arm": "prueba del brazo",
       "speech": "prueba del habla"
     },
+    "side": {
+      "left": "izquierdo",
+      "right": "derecho"
+    },
     "reason": {
       "check": {
         "face": "movimiento facial desigual",
         "arm": "debilidad o caída del brazo",
         "speech": "habla poco clara"
+      },
+      "checkSided": {
+        "face": "movimiento facial desigual del lado {side}",
+        "arm": "debilidad o caída del brazo {side}"
       },
       "befast": {
         "balance": "pérdida repentina del equilibrio",

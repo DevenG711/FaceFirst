@@ -105,7 +105,10 @@ Design decision: with a baseline, a check is flagged if it exceeds either the ba
 
 ## Copy (`src/lib/triage/copy.ts`)
 
-`resultCopy(result, locale) → { titleKey, bodyKeys[], actionKeys[] }`, resolved against `lib/i18n/{en,es,pt}.json` under `result.*`.
+`resultCopy(result, locale) → { titleKey, bodyKeys[], actionKeys[], params, colorToken, title, body[], actions[] }`, resolved against `lib/i18n/{en,es,pt}.json` under `result.*`. `params` holds the localized `{reasons}` / `{checks}` values; render any key with `t(locale, key, params)` (re-exported from `copy.ts`). `title`/`body`/`actions` are the same strings pre-rendered.
+
+- The "If you noticed sudden symptoms, call 911." line is its own key, `result.call911Line`, appended as the last body key for `CANNOT_RULE_OUT` and `RETRY_CAPTURE`.
+- Flagged face/arm checks with a known side use `result.reason.checkSided.{face,arm}` with `{side}` = `result.side.{left,right}` (anatomical). Otherwise `result.reason.check.*`.
 
 | State | Title (en) | Body (en) | Color |
 |---|---|---|---|
