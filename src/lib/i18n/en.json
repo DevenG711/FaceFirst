@@ -132,5 +132,13 @@
         "speech_wrong": "someone reports unclear speech"
       }
     }
+  },
+  "baseline": {
+    "title": "Record a baseline",
+    "intro": "Record a short, healthy video of your loved one now, while they are well. Later, a check can compare against their own normal face and arm movement.",
+    "note": "Nothing is uploaded. The recording stays on this device.",
+    "start": "Start recording",
+    "back": "Back to home",
+    "voice": "Record a short healthy video now. It stays on this device and is never uploaded."
   }
 }

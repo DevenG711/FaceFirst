@@ -132,5 +132,13 @@
         "speech_wrong": "alguém relata fala pouco clara"
       }
     }
+  },
+  "baseline": {
+    "title": "Gravar uma referência",
+    "intro": "Grave agora um vídeo curto do seu ente querido enquanto está saudável. Depois, uma verificação pode comparar com o movimento normal do próprio rosto e braços.",
+    "note": "Nada é enviado. A gravação permanece neste dispositivo.",
+    "start": "Começar a gravar",
+    "back": "Voltar ao início",
+    "voice": "Grave agora um vídeo curto estando saudável. Ele permanece neste dispositivo e nunca é enviado."
   }
 }

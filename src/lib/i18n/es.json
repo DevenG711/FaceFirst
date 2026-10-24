@@ -132,5 +132,13 @@
         "speech_wrong": "alguien informa que el habla no es clara"
       }
     }
+  },
+  "baseline": {
+    "title": "Grabar una referencia",
+    "intro": "Grabe ahora un video corto de su ser querido mientras está sano. Más tarde, una prueba puede compararlo con su propio movimiento normal de rostro y brazos.",
+    "note": "No se sube nada. La grabación permanece en este dispositivo.",
+    "start": "Comenzar a grabar",
+    "back": "Volver al inicio",
+    "voice": "Grabe ahora un video corto estando sano. Permanece en este dispositivo y nunca se sube."
   }
 }
