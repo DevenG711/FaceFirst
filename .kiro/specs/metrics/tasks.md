@@ -1,0 +1,29 @@
+# Implementation Plan: Metrics
+
+- [x] 1. Geometry
+  - [x] 1.1 `geometry.ts`: `frameFrom`, `faceFrame` (33 → 263), `poseFrame` (12 → 11), `normalizePoint(s)` with caller buffers, degenerate-frame rejection.
+    - _Requirements: 1.1, 1.2, 1.3, 1.5_
+  - [x] 1.2 Side mapping: `toAnatomical`, `flipSide`, `anatomicalSideOfA/B`, `BLENDSHAPE_LEFT_IS_SIDE`.
+    - _Requirements: 1.4_
+  - [x] 1.3 Properties in `tests/metrics.property.test.ts`.
+    - _Requirements: 1.1–1.4_
+- [x] 2. Face asymmetry
+  - [x] 2.1 `faceAsymmetry.ts` with `pickBlendshapes`; weights in `METRIC_PARAMS`, gate in `QUALITY.MIN_FACE_FRAMES`.
+    - _Requirements: 2.1–2.6, 5.1_
+  - [x] 2.2 Properties + `triage()` integration test.
+    - _Requirements: 2.1–2.6, 5.2_
+- [x] 3. Arm drift
+  - [x] 3.1 `armDrift.ts`; window in `METRIC_PARAMS`, gates in `QUALITY.MIN_ARM_FRAMES` / `MIN_LANDMARK_VISIBILITY`.
+    - _Requirements: 3.1–3.7, 5.1_
+  - [x] 3.2 Properties + `triage()` integration test.
+    - _Requirements: 3.1–3.7, 5.2_
+- [x] 4. Speech
+  - [x] 4.1 `speech.ts`: `words`, `speechScore` (LCS), `speechTiming`.
+    - _Requirements: 4.1–4.7, 5.1_
+  - [x] 4.2 Properties + `triage()` integration test.
+    - _Requirements: 4.1–4.7, 5.2_
+- [x] 5. Checkpoint
+  - Mutation-tested each metric (swapped sides, removed abs/floor/normalization/lowercasing, broken pause logic); every mutation fails at least one test. `npx vitest --run` green.
+- [ ] 6. Live verification (needs partner2's camera pipeline)
+  - Confirm `BLENDSHAPE_LEFT_IS_SIDE`: unmirrored, smile on one side only, check which `mouthSmile*` rises.
+  - Confirm a deliberate left-side droop / left-arm drop is reported as `left` in the real app.
