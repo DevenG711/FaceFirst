@@ -115,9 +115,12 @@ describe('faceAsymmetry', () => {
       fc.property(arbFaceSeq, arbPose, fc.boolean(), (fs, pose, mirrored) => {
         const ref = faceAsymmetry(faceSeq(fs, IDENTITY), { mirrored });
         const moved = faceAsymmetry(faceSeq(fs, pose), { mirrored });
-        expect(moved.status).toBe('ok');
-        expect(Math.abs(moved.score! - ref.score!)).toBeLessThan(1e-6);
-        if (ref.score! > 1e-6) expect(moved.side).toBe(ref.side);
+        // The quality gate decides on frame geometry, which is pose-invariant, so the STATUS matches too.
+        expect(moved.status).toBe(ref.status);
+        if (ref.status === 'ok') {
+          expect(Math.abs(moved.score! - ref.score!)).toBeLessThan(1e-6);
+          if (ref.score! > 1e-6) expect(moved.side).toBe(ref.side);
+        }
       }),
       FEW
     );
@@ -151,7 +154,12 @@ describe('faceAsymmetry', () => {
             return lowerA ? { ...f, a: { ...f.a, y: f.a.y + d } } : { ...f, b: { ...f.b, y: f.b.y + d } };
           });
           const after = faceAsymmetry(faceSeq(lowered, pose), { mirrored: true });
-          expect(after.score!).toBeGreaterThanOrEqual(before.score! - 1e-9);
+          // Monotonicity is a property of the SCORE. When either capture is gated to poor_quality
+          // (an ambiguous, near-symmetric sequence), there is no score to compare — skip that case;
+          // the gate itself is covered by tests/pipeline.fixture.test.ts.
+          if (before.status === 'ok' && after.status === 'ok') {
+            expect(after.score!).toBeGreaterThanOrEqual(before.score! - 1e-9);
+          }
         }
       ),
       FEW
