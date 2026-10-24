@@ -4,7 +4,87 @@
   },
   "home": {
     "title": "FaceFirst",
+    "languageName": "Español",
+    "language": "Idioma",
+    "tagline": "Una revisión de 60 segundos de señales de alerta de derrame cerebral.",
+    "timeNoticed": {
+      "label": "¿Cuándo empezaron los síntomas?",
+      "hint": "Los paramédicos necesitan esta hora. Elija su mejor estimación.",
+      "justNow": "Ahora mismo",
+      "lastHour": "En la última hora",
+      "oneToThreeHours": "Hace 1 a 3 horas",
+      "moreThanThreeHours": "Hace más de 3 horas",
+      "notSure": "No estoy seguro"
+    },
+    "start": "Comenzar la revisión",
+    "baseline": "Grabar una referencia",
+    "voice": {
+      "welcome": "Bienvenido a FaceFirst. Si cree que alguien está teniendo un derrame cerebral, llame al 911 ahora. También puede tocar Comenzar la revisión."
+    },
     "disclaimer": "FaceFirst es un prototipo solo para demostración. No es un dispositivo médico y no diagnostica derrames cerebrales. El uso comercial requeriría validación clínica y revisión de la FDA."
+  },
+  "check": {
+    "common": {
+      "checking": "Revisando…",
+      "complete": "Revisión terminada",
+      "skip": "Saltar esta revisión",
+      "next": "Siguiente"
+    },
+    "coach": {
+      "moveCloser": "Acérquese más",
+      "faceCamera": "Mire hacia la cámara",
+      "moreLight": "Necesita más luz",
+      "holdStill": "Quédese quieto"
+    },
+    "camera": {
+      "label": "Vista de la cámara",
+      "progress": "Progreso de la revisión",
+      "starting": "Encendiendo la cámara…",
+      "denied": "No podemos usar la cámara. Puede saltar esta revisión. Si notó síntomas repentinos, llame al 911.",
+      "unsupported": "Este navegador no puede usar la cámara. Puede saltar esta revisión. Si notó síntomas repentinos, llame al 911."
+    },
+    "face": {
+      "title": "Revisión de la cara",
+      "instructions": "Mire a la cámara y sonría ampliamente. Revisaremos si un lado de la cara se cae.",
+      "start": "Comenzar la revisión de la cara"
+    },
+    "arm": {
+      "title": "Revisión de los brazos",
+      "instructions": "Extienda ambos brazos hacia adelante, con las palmas hacia arriba. Manténgalos así. Revisaremos si un brazo baja.",
+      "start": "Comenzar la revisión de los brazos"
+    },
+    "speech": {
+      "title": "Revisión del habla",
+      "instructions": "Pídale que lea esta frase en voz alta:",
+      "phrase": "El cielo está azul hoy.",
+      "start": "Toque y hable",
+      "listening": "Escuchando…",
+      "heard": "Escuchamos:",
+      "noSpeech": "No escuchamos nada. Intente de nuevo o responda la pregunta de abajo.",
+      "micDenied": "No podemos usar el micrófono. Responda la pregunta de abajo.",
+      "unsupported": "Este navegador no puede escuchar el habla. Responda la pregunta de abajo.",
+      "disclosure": "El reconocimiento de voz de Chrome envía el audio a los servidores de Google.",
+      "caregiver": {
+        "question": "¿Su forma de hablar se entiende bien?",
+        "slurred": "Habla arrastrada o confusa",
+        "noChange": "No noto ningún cambio",
+        "notSure": "No estoy seguro"
+      }
+    },
+    "befast": {
+      "title": "Algunas preguntas rápidas",
+      "progress": "Pregunta {n} de {total}",
+      "balance": "¿Ha tenido de repente problemas de equilibrio o coordinación?",
+      "vision": "¿Ha perdido la vista de repente o ha notado cambios en uno o ambos ojos?",
+      "headache": "¿Ha tenido de repente un dolor de cabeza muy fuerte sin causa conocida?",
+      "numbness": "¿Ha sentido de repente entumecimiento o debilidad, sobre todo en un lado del cuerpo?",
+      "answer": {
+        "yes": "Sí",
+        "no": "No",
+        "unsure": "No estoy seguro"
+      },
+      "back": "Atrás"
+    }
   },
   "result": {
     "call911Line": "Si notó síntomas repentinos, llame al 911.",

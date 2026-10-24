@@ -6,11 +6,16 @@
   import '../app.css';
   import type { Snippet } from 'svelte';
   import Call911Button from '#lib/components/Call911Button.svelte';
+  import { locale } from '#lib/stores/session.ts';
 
   let { children }: { children: Snippet } = $props();
+
+  $effect(() => {
+    document.documentElement.lang = $locale;
+  });
 </script>
 
-<Call911Button />
+<Call911Button locale={$locale} />
 
 <main>
   {@render children()}
