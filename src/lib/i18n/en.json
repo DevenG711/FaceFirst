@@ -7,29 +7,38 @@
     "disclaimer": "FaceFirst is a prototype for demonstration only. It is not a medical device and does not diagnose stroke. Commercial use would require clinical validation and FDA review."
   },
   "result": {
+    "call911Line": "If you noticed sudden symptoms, call 911.",
     "call911": {
       "title": "CALL 911 NOW",
       "body": "Warning signs of stroke were found: {reasons}. Note the time symptoms started."
     },
     "cannotRuleOut": {
       "title": "We can't rule out a stroke",
-      "body": "This check cannot rule out a stroke. If you noticed sudden symptoms, call 911.",
+      "body": "This check cannot rule out a stroke.",
       "recheck": "You can run this check again at any time. Don't wait if you have symptoms. Call 911."
     },
     "retry": {
       "title": "We couldn't get a clear reading",
-      "body": "Please retry: {checks}. If you noticed sudden symptoms, call 911."
+      "body": "Please retry: {checks}."
     },
     "check": {
       "face": "face check",
       "arm": "arm check",
       "speech": "speech check"
     },
+    "side": {
+      "left": "left",
+      "right": "right"
+    },
     "reason": {
       "check": {
         "face": "uneven face movement",
         "arm": "arm weakness or drift",
         "speech": "unclear speech"
+      },
+      "checkSided": {
+        "face": "uneven face movement on the {side} side",
+        "arm": "weakness or drift in the {side} arm"
       },
       "befast": {
         "balance": "sudden loss of balance",

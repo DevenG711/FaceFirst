@@ -105,7 +105,10 @@ Design decision: with a baseline, a check is flagged if it exceeds either the ba
 
 ## Copy (`src/lib/triage/copy.ts`)
 
-`resultCopy(result, locale) → { titleKey, bodyKeys[], actionKeys[] }`, resolved against `lib/i18n/{en,es,pt}.json` under `result.*`.
+`resultCopy(result, locale) → { titleKey, bodyKeys[], actionKeys[], params, colorToken, title, body[], actions[] }`, resolved against `lib/i18n/{en,es,pt}.json` under `result.*`. `params` holds the localized `{reasons}` / `{checks}` values; render any key with `t(locale, key, params)` (re-exported from `copy.ts`). `title`/`body`/`actions` are the same strings pre-rendered.
+
+- The "If you noticed sudden symptoms, call 911." line is its own key, `result.call911Line`, appended as the last body key for `CANNOT_RULE_OUT` and `RETRY_CAPTURE`.
+- Flagged face/arm checks with a known side use `result.reason.checkSided.{face,arm}` with `{side}` = `result.side.{left,right}` (anatomical). Otherwise `result.reason.check.*`.
 
 | State | Title (en) | Body (en) | Color |
 |---|---|---|---|
@@ -128,7 +131,7 @@ Properties (`tests/triage.property.test.ts`), each ≥ 1000 runs:
 | P3 | Any flagged check / BE-FAST yes / caregiver report ⇒ `CALL_911_NOW`, and reasons contain it | 2.1–2.4 |
 | P4 | Monotonicity: add one finding ⇒ urgency non-decreasing | 3.1 |
 | P5 | Monotonicity: increase one ok score ⇒ urgency non-decreasing | 3.2 |
-| P6 | Degrade one check ok → poor_quality ⇒ urgency non-decreasing | 4.3 |
+| P6 | Degrade one non-flagged check ok → poor_quality ⇒ urgency non-decreasing | 4.3 |
 | P7 | No findings + any poor_quality ⇒ `RETRY_CAPTURE` with correct retryChecks | 4.1, 4.4 |
 | P8 | Adding a baseline (any values) ⇒ urgency non-decreasing | 5.3 |
 | P9 | No findings, no poor_quality ⇒ `CANNOT_RULE_OUT` | 2.5 |

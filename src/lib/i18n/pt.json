@@ -7,29 +7,38 @@
     "disclaimer": "O FaceFirst é um protótipo apenas para demonstração. Não é um dispositivo médico e não diagnostica AVC. O uso comercial exigiria validação clínica e revisão da FDA."
   },
   "result": {
+    "call911Line": "Se você notou sintomas repentinos, ligue para o 911.",
     "call911": {
       "title": "LIGUE PARA O 911 AGORA",
       "body": "Foram encontrados sinais de alerta de AVC: {reasons}. Anote a hora em que os sintomas começaram."
     },
     "cannotRuleOut": {
       "title": "Não podemos descartar um AVC",
-      "body": "Esta verificação não pode descartar um AVC. Se você notou sintomas repentinos, ligue para o 911.",
+      "body": "Esta verificação não pode descartar um AVC.",
       "recheck": "Você pode repetir esta verificação a qualquer momento. Não espere se tiver sintomas. Ligue para o 911."
     },
     "retry": {
       "title": "Não conseguimos uma leitura clara",
-      "body": "Tente novamente: {checks}. Se você notou sintomas repentinos, ligue para o 911."
+      "body": "Tente novamente: {checks}."
     },
     "check": {
       "face": "verificação do rosto",
       "arm": "verificação do braço",
       "speech": "verificação da fala"
     },
+    "side": {
+      "left": "esquerdo",
+      "right": "direito"
+    },
     "reason": {
       "check": {
         "face": "movimento facial desigual",
         "arm": "fraqueza ou queda do braço",
         "speech": "fala pouco clara"
+      },
+      "checkSided": {
+        "face": "movimento facial desigual do lado {side}",
+        "arm": "fraqueza ou queda do braço {side}"
       },
       "befast": {
         "balance": "perda repentina de equilíbrio",
