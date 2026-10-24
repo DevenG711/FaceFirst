@@ -13,13 +13,10 @@ import {
   type FaceLandmarkerResult,
   type PoseLandmarkerResult,
 } from '@mediapipe/tasks-vision';
-import {
-  faceAsymmetry,
-  pickBlendshapes,
-  type FaceFrameInput,
-} from '#lib/metrics/faceAsymmetry.ts';
+import { faceAsymmetry, type FaceFrameInput } from '#lib/metrics/faceAsymmetry.ts';
 import { armDrift, type ArmFrameInput } from '#lib/metrics/armDrift.ts';
 import type { CheckResult } from '#lib/triage/types.ts';
+import { armFrameFromResult, faceFrameFromResult } from './mapFrames.ts';
 
 /** WASM runtime, vendored into static/ so it loads from our own origin. */
 const WASM_PATH = '/mediapipe/wasm';
@@ -64,9 +61,6 @@ async function poseLandmarker(): Promise<PoseLandmarker> {
   return posePromise;
 }
 
-/** Pixel-coordinate converter for one landmark. */
-const toPx = (l: { x: number; y: number }, w: number, h: number) => ({ x: l.x * w, y: l.y * h });
-
 /**
  * Runs `kind` detection over `video` until `signal` aborts, collecting one metric frame per
  * animation tick, then returns the metric's CheckResult. On any failure (model load, detection)
@@ -89,18 +83,7 @@ export async function runCameraCheck(
       const frames: (FaceFrameInput | null)[] = [];
       await collect(video, signal, (nowMs) => {
         const res: FaceLandmarkerResult = landmarker.detectForVideo(video, nowMs);
-        const lm = res.faceLandmarks[0];
-        frames.push(
-          lm
-            ? {
-                eye33: toPx(lm[33]!, W, H),
-                eye263: toPx(lm[263]!, W, H),
-                mouth61: toPx(lm[61]!, W, H),
-                mouth291: toPx(lm[291]!, W, H),
-                blendshapes: pickBlendshapes(res.faceBlendshapes[0]?.categories ?? []),
-              }
-            : null
-        );
+        frames.push(faceFrameFromResult(res, W, H));
       });
       return faceAsymmetry(frames, { mirrored: false });
     }
@@ -109,19 +92,7 @@ export async function runCameraCheck(
     const frames: (ArmFrameInput | null)[] = [];
     await collect(video, signal, (nowMs) => {
       const res: PoseLandmarkerResult = landmarker.detectForVideo(video, nowMs);
-      const p = res.landmarks[0];
-      const pv = (l: { x: number; y: number; visibility?: number } | undefined) =>
-        l ? { ...toPx(l, W, H), visibility: l.visibility } : null;
-      frames.push(
-        p
-          ? {
-              shoulder11: pv(p[11]),
-              shoulder12: pv(p[12]),
-              wrist15: pv(p[15]),
-              wrist16: pv(p[16]),
-            }
-          : null
-      );
+      frames.push(armFrameFromResult(res, W, H));
     });
     return armDrift(frames, { mirrored: false });
   } catch {
