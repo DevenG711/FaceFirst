@@ -1,0 +1,113 @@
+// Normalization for every metric. Pure: no DOM, no MediaPipe, no Svelte.
+// This is the ONLY place that knows about mirroring; everything downstream reports anatomical sides.
+//
+// Coordinates: pass PIXEL coordinates (MediaPipe x * videoWidth, y * videoHeight), not raw 0–1
+// landmarks, otherwise a non-square frame distorts distances. y points down, as in images.
+//
+// A "frame" is defined by two reference points A→B (outer eye corners 33→263, or shoulders 11→12):
+//   - origin: the midpoint of A and B          (translation invariance)
+//   - angle:  the roll of the A→B line         (roll invariance; after normalizing, A→B is horizontal)
+//   - scale:  |AB| (inter-ocular / shoulder width) (scale invariance; after normalizing, |AB| = 1)
+// So after normalizing, A = (-0.5, 0) and B = (0.5, 0).
+import type { Side } from '../triage/types.ts';
+
+export interface Point {
+  x: number;
+  y: number;
+}
+
+export interface Frame {
+  origin: Point;
+  /** Radians. Roll of the A→B reference line, atan2(dy, dx). */
+  angle: number;
+  /** Length of A→B in input units (> 0). */
+  scale: number;
+  /** Cached for hot loops. */
+  cos: number;
+  sin: number;
+}
+
+const finite = (p: Point): boolean => Number.isFinite(p.x) && Number.isFinite(p.y);
+
+export function distance(a: Point, b: Point): number {
+  return Math.hypot(b.x - a.x, b.y - a.y);
+}
+
+export function midpoint(a: Point, b: Point, out: Point = { x: 0, y: 0 }): Point {
+  out.x = (a.x + b.x) / 2;
+  out.y = (a.y + b.y) / 2;
+  return out;
+}
+
+/** Roll of the line a→b in radians. Zero when b is directly to the right of a. */
+export function rollAngle(a: Point, b: Point): number {
+  return Math.atan2(b.y - a.y, b.x - a.x);
+}
+
+/**
+ * Builds a normalization frame from two reference points, or returns null if it is degenerate
+ * (coincident or non-finite points). Callers should treat null as a frame that could not be used.
+ */
+export function frameFrom(a: Point, b: Point): Frame | null {
+  if (!finite(a) || !finite(b)) return null;
+  const scale = distance(a, b);
+  if (!(scale > 0) || !Number.isFinite(scale)) return null;
+  const angle = rollAngle(a, b);
+  return { origin: midpoint(a, b), angle, scale, cos: Math.cos(angle), sin: Math.sin(angle) };
+}
+
+/** Face frame from outer eye corners (landmarks 33 → 263): inter-ocular units, eye line horizontal. */
+export const faceFrame = (eye33: Point, eye263: Point): Frame | null => frameFrom(eye33, eye263);
+
+/** Pose frame from shoulders (landmarks 11 → 12): shoulder-width units, shoulder line horizontal. */
+export const poseFrame = (shoulder11: Point, shoulder12: Point): Frame | null =>
+  frameFrom(shoulder11, shoulder12);
+
+/** Maps p into `frame`: translate to the origin, rotate by −angle, divide by scale. Writes into `out`. */
+export function normalizePoint(p: Point, frame: Frame, out: Point = { x: 0, y: 0 }): Point {
+  const dx = p.x - frame.origin.x;
+  const dy = p.y - frame.origin.y;
+  // Rotation by −angle: [cos sin; −sin cos].
+  const x = (dx * frame.cos + dy * frame.sin) / frame.scale;
+  const y = (-dx * frame.sin + dy * frame.cos) / frame.scale;
+  out.x = x;
+  out.y = y;
+  return out;
+}
+
+/**
+ * Normalizes every point into `frame`. Pass a reused `out` array in per-frame loops to avoid
+ * allocations: existing Point objects in `out` are overwritten and the array is resized to fit.
+ */
+export function normalizePoints(points: readonly Point[], frame: Frame, out: Point[] = []): Point[] {
+  for (let i = 0; i < points.length; i++) {
+    out[i] = normalizePoint(points[i]!, frame, out[i]);
+  }
+  out.length = points.length;
+  return out;
+}
+
+export function flipSide(side: Side): Side {
+  return side === 'left' ? 'right' : 'left';
+}
+
+/**
+ * Converts an IMAGE side (left/right of the frame passed to MediaPipe) to the person's ANATOMICAL side.
+ *
+ * `mirrored` = whether the frame given to MediaPipe was horizontally flipped (selfie view).
+ * - Not mirrored (raw camera): the person faces the camera, so their right appears on image-left.
+ * - Mirrored: image-left is the person's left.
+ *
+ * For a fixed `mirrored` this is an involution; flipping `mirrored` flips the result.
+ */
+export function toAnatomical(imageSide: Side, mirrored: boolean): Side {
+  return mirrored ? imageSide : flipSide(imageSide);
+}
+
+/**
+ * Anatomical side of reference point A (the first point of the frame, e.g. landmark 33 or 11).
+ * After normalizing, A sits at x = −0.5, i.e. image-left, so this is `toAnatomical('left', mirrored)`.
+ */
+export function anatomicalSideOfA(mirrored: boolean): Side {
+  return toAnatomical('left', mirrored);
+}
