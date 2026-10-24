@@ -6,14 +6,21 @@
 -->
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { get } from 'svelte/store';
   import { goto } from '$app/navigation';
   import { t } from '#lib/i18n/index.ts';
   import { speechErrorScore } from '#lib/metrics/speech.ts';
-  import { locale, setCaregiverReport, setCheck, unavailableCheck } from '#lib/stores/session.ts';
+  import { triage } from '#lib/triage/engine.ts';
+  import {
+    caregiverReports,
+    checks,
+    locale,
+    setCaregiverReport,
+    setCheck,
+    unavailableCheck,
+  } from '#lib/stores/session.ts';
   import { speak, VOICE_LANG } from '#lib/voice.ts';
   import FlowProgress from '#lib/components/FlowProgress.svelte';
-
-  const NEXT = '/check/befast';
   const JUDGMENTS = ['slurred', 'noChange', 'notSure'] as const;
   type Judgment = (typeof JUDGMENTS)[number];
 
@@ -104,6 +111,22 @@
     judgment = answer;
     setCaregiverReport('speech_wrong', answer === 'slurred');
   }
+
+  /**
+   * Sensor-first routing. A preliminary triage on the sensor checks and caregiver reports (no
+   * BE-FAST answers yet; baseline null, as on /result) decides whether the questions are needed:
+   * any finding already means CALL_911_NOW, so go straight to the result. Otherwise offer the
+   * optional questions, which can only add findings, never remove them.
+   */
+  function next() {
+    const preliminary = triage({
+      checks: get(checks),
+      beFast: {},
+      caregiverReports: get(caregiverReports),
+      baseline: null,
+    });
+    goto(preliminary.state === 'CALL_911_NOW' ? '/result' : '/check/befast');
+  }
 </script>
 
 <div class="check">
@@ -150,7 +173,7 @@
   </fieldset>
 
   <div class="actions">
-    <button type="button" class="button secondary" onclick={() => goto(NEXT)}>
+    <button type="button" class="button secondary" onclick={next}>
       {t($locale, 'check.common.next')}
     </button>
   </div>

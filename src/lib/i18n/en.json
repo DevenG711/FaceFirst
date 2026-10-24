@@ -74,6 +74,7 @@
     },
     "befast": {
       "title": "A few quick questions",
+      "intro": "A few quick questions can catch warning signs the camera can't see. They're optional.",
       "progress": "Question {n} of {total}",
       "balance": "Have they had sudden trouble with balance or coordination?",
       "vision": "Have they had sudden vision loss or changes in one or both eyes?",
@@ -84,7 +85,8 @@
         "no": "No",
         "unsure": "Not sure"
       },
-      "back": "Back"
+      "back": "Back",
+      "skip": "Skip questions"
     }
   },
   "result": {
