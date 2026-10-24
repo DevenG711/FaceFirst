@@ -25,6 +25,19 @@
   main {
     max-width: 40rem;
     margin: 0 auto;
-    padding: 1rem;
+    padding: 1rem 1rem 2rem;
+    animation: screen-in 0.25s ease both;
+  }
+
+  /* Calm entrance; the global prefers-reduced-motion rule in app.css disables it. */
+  @keyframes screen-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
 </style>
