@@ -55,6 +55,21 @@ export const QUALITY = {
    * Uncalibrated placeholder.
    */
   MIN_ARM_FRAME_SPAN: 0.5, // fraction of the clip's frames that must be usable. Uncalibrated placeholder.
+  /**
+   * Arm "fit" gate before the hold timer starts: this many CONSECUTIVE frames must show both shoulders
+   * and both wrists (the same test armDrift uses to count a frame) before we say "Good, hold still".
+   * Consecutive so a single lucky frame does not start the timer. Uncalibrated placeholder.
+   */
+  ARM_FIT_FRAMES: 10, // ~0.5 s at 20 fps. Uncalibrated placeholder.
+  /**
+   * Face "start when smiling" gate. The capture starts once the STRONGER side's mouthSmile blendshape
+   * reaches FACE_SMILE_START for FACE_SMILE_FRAMES consecutive frames. If that never happens within
+   * FACE_SMILE_WAIT_MS (the person cannot smile or cannot follow the prompt, both possible stroke
+   * signs), the capture starts anyway so the gate can never stall the check. Uncalibrated placeholders.
+   */
+  FACE_SMILE_START: 0.4, // mouthSmile blendshape (0–1). Uncalibrated placeholder.
+  FACE_SMILE_FRAMES: 5, // ~0.25 s at 20 fps. Uncalibrated placeholder.
+  FACE_SMILE_WAIT_MS: 8000, // ms. Uncalibrated placeholder.
 } as const;
 
 /** Weights and windows used to turn raw measurements into scores in lib/metrics. UNCALIBRATED placeholders. */

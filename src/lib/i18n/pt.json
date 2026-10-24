@@ -41,7 +41,17 @@
       "moveCloser": "Chegue mais perto",
       "faceCamera": "Olhe para a câmera",
       "moreLight": "Precisa de mais luz",
-      "holdStill": "Fique parado"
+      "holdStill": "Fique parado",
+      "arm": {
+        "shoulders": "Dê um passo para trás para mostrar os dois ombros",
+        "wrists": "Estique os dois braços à frente",
+        "ready": "Ótimo, fique parado"
+      },
+      "face": {
+        "face": "Coloque o rosto dentro do oval",
+        "smile": "Dê um grande sorriso agora",
+        "ready": "Ótimo, continue sorrindo"
+      }
     },
     "camera": {
       "label": "Visualização da câmera",
@@ -52,10 +62,10 @@
     },
     "face": {
       "title": "Verificação do rosto",
-      "instructions": "Olhe para a câmera e dê um grande sorriso. Vamos verificar se um lado do rosto está caído.",
+      "instructions": "Dê um grande sorriso mostrando os dentes. Olhe para a câmera. A verificação começa quando você sorrir. Vamos verificar se um lado do rosto está caído.",
       "start": "Começar a verificação do rosto",
-      "headline": "Olhe para a câmera",
-      "headlineEm": "e sorria."
+      "headline": "Dê um grande sorriso",
+      "headlineEm": "mostrando os dentes."
     },
     "arm": {
       "title": "Verificação dos braços",

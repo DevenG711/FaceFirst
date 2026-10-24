@@ -8,11 +8,12 @@
 <script lang="ts">
   import { t, type Locale } from '#lib/i18n/index.ts';
   import FaceGuide from '#lib/components/FaceGuide.svelte';
-  import { runCameraCheck } from '#lib/vision/index.ts';
+  import { runCameraCheck, waitForFit, type FitHint } from '#lib/vision/index.ts';
   import { unavailableCheck } from '#lib/stores/session.ts';
   import type { CheckResult } from '#lib/triage/types.ts';
 
-  type Status = 'idle' | 'starting' | 'running' | 'done' | 'denied' | 'unsupported';
+  // 'fitting': camera is live but the timer waits (arm: until framed; face: until smiling).
+  type Status = 'idle' | 'starting' | 'fitting' | 'running' | 'done' | 'denied' | 'unsupported';
 
   let {
     guide,
@@ -22,6 +23,7 @@
     duration = 5000,
     oncomplete,
     onunavailable,
+    onfit,
   }: {
     guide: 'face' | 'arm';
     locale: Locale;
@@ -34,7 +36,11 @@
     oncomplete?: (result: CheckResult) => void;
     /** Camera permission denied or no camera API in this browser. */
     onunavailable?: () => void;
+    /** Called right before the timer starts: `fit` = ready, `timeout` = face never smiled, recording anyway. */
+    onfit?: (outcome: 'fit' | 'timeout') => void;
   } = $props();
+
+  let fitHint = $state<FitHint>('shoulders');
 
   let video: HTMLVideoElement | undefined = $state();
   let canvas: HTMLCanvasElement | undefined = $state();
@@ -63,7 +69,11 @@
     progress = 0;
     try {
       stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user' },
+        // The arm check needs a wide frame (both arms held out); the face check is portrait.
+        video:
+          guide === 'arm'
+            ? { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
+            : { facingMode: 'user' },
         audio: false,
       });
     } catch {
@@ -75,6 +85,22 @@
 
     video.srcObject = stream;
     await video.play().catch(() => {});
+
+    // Pre-capture gate. Arm: wait until both shoulders and both wrists are in view. Face: wait until
+    // they smile (or give up after QUALITY.FACE_SMILE_WAIT_MS and record anyway, so someone who
+    // cannot smile is still measured). Skip and the 911 button stay available the whole time.
+    status = 'fitting';
+    fitHint = guide === 'arm' ? 'shoulders' : 'face';
+    abort = new AbortController();
+    const fit = await waitForFit(guide, video, abort.signal, (h) => (fitHint = h));
+    if (fit === 'aborted' || !active) return;
+    if (fit === 'error') {
+      stop();
+      status = 'done';
+      oncomplete?.(unavailableCheck(guide));
+      return;
+    }
+    onfit?.(fit);
     status = 'running';
 
     // Run detection over the capture window; the controller stops it when the bar fills.
@@ -156,7 +182,14 @@
   {#if status === 'denied' || status === 'unsupported'}
     <p class="panel fallback" role="alert">{t(locale, `check.camera.${status}`)}</p>
   {:else}
-    <div class="panel stage" class:live={status === 'running' || status === 'done'} role="group" aria-label={t(locale, 'check.camera.label')}>
+    <!-- Live while fitting too: the person has to see themselves to get framed / start smiling. -->
+    <div
+      class="panel stage"
+      class:live={status === 'fitting' || status === 'running' || status === 'done'}
+      class:wide={guide === 'arm'}
+      role="group"
+      aria-label={t(locale, 'check.camera.label')}
+    >
       <!-- svelte-ignore a11y_media_has_caption -- live camera preview, no audio -->
       <video bind:this={video} playsinline muted></video>
       <canvas bind:this={canvas} aria-hidden="true"></canvas>
@@ -181,6 +214,8 @@
         <p class="pill status" aria-live="polite">
           <span class="dot pulse"></span>{t(locale, 'check.camera.starting')}
         </p>
+      {:else if status === 'fitting'}
+        <p class="pill status" aria-live="polite">{t(locale, `check.coach.${guide}.${fitHint}`)}</p>
       {:else if coaching}
         <p class="pill status" aria-live="polite">
           {#if status === 'running'}<span class="dot pulse"></span>{/if}
@@ -212,6 +247,11 @@
     height: 460px;
     max-height: 62dvh;
     overflow: hidden;
+  }
+
+  /* The arm check needs a wide frame so both outstretched arms and the shoulders fit. */
+  .stage.wide {
+    aspect-ratio: 4 / 3;
   }
 
   video,

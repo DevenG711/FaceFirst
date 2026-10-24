@@ -2,10 +2,11 @@
 // geometry.ts properties live in metrics.property.test.ts.
 import { describe, expect, it } from 'vitest';
 import fc from 'fast-check';
-import { armDrift, type ArmFrameInput } from '#lib/metrics/armDrift.ts';
+import { armDrift, armFit, type ArmFrameInput } from '#lib/metrics/armDrift.ts';
 import {
   FACE_BLENDSHAPES,
   faceAsymmetry,
+  faceFit,
   pickBlendshapes,
   type FaceBlendshapes,
   type FaceFrameInput,
@@ -250,6 +251,41 @@ describe('faceAsymmetry', () => {
   });
 });
 
+describe('faceFit (start-when-smiling gate)', () => {
+  const unit = fc.double({ min: 0, max: 1, noNaN: true });
+  const frameWith = (smileL: number, smileR: number): FaceFrameInput => ({
+    eye33: { x: 0, y: 0 },
+    eye263: { x: 100, y: 0 },
+    mouth61: { x: 20, y: 80 },
+    mouth291: { x: 80, y: 80 },
+    blendshapes: {
+      ...(Object.fromEntries(FACE_BLENDSHAPES.map((n) => [n, 0])) as FaceBlendshapes),
+      mouthSmileLeft: smileL,
+      mouthSmileRight: smileR,
+    },
+  });
+
+  it('starts on the STRONGER side: a one-sided smile (the other side weak) still counts', () => {
+    fc.assert(
+      fc.property(unit, unit, fc.boolean(), (a, b, flip) => {
+        const [l, r] = flip ? [a, b] : [b, a];
+        const expected = Math.max(a, b) >= QUALITY.FACE_SMILE_START ? 'ok' : 'smile';
+        expect(faceFit(frameWith(l, r))).toBe(expected);
+        // Full smile on one side, none on the other, always starts.
+        expect(faceFit(frameWith(flip ? 1 : 0, flip ? 0 : 1))).toBe('ok');
+      }),
+      RUNS
+    );
+  });
+
+  it('a frame faceAsymmetry cannot use reports "face", never "ok"', () => {
+    expect(faceFit(null)).toBe('face');
+    const f = frameWith(1, 1);
+    expect(faceFit({ ...f, eye263: f.eye33 })).toBe('face');
+    expect(faceFit({ ...f, blendshapes: { ...f.blendshapes, eyeBlinkLeft: undefined } })).toBe('face');
+  });
+});
+
 // ---------- arm ----------
 
 /** Canonical arm hold: wrist heights per frame (y down, shoulder-width units), A = 12/16 at x = −0.5, B = 11/15. */
@@ -357,6 +393,26 @@ describe('armDrift', () => {
         expect(armDrift(armImage(arm, pose, QUALITY.MIN_LANDMARK_VISIBILITY / 2), { mirrored })).toEqual(poor);
         expect(armDrift(frames.slice(0, n), { mirrored })).toEqual(poor);
         expect(armDrift(frames.map(() => null), { mirrored })).toEqual(poor);
+      }),
+      FEW
+    );
+  });
+
+  it('armFit: "ok" exactly for frames armDrift counts; names shoulders before wrists', () => {
+    fc.assert(
+      fc.property(arbArm, arbPose, fc.boolean(), fc.double({ min: 0, max: 1, noNaN: true }), (arm, pose, mirrored, vis) => {
+        const frames = armImage(arm, pose, vis);
+        const fitsAll = frames.every((f) => armFit(f) === 'ok');
+        // A full run of fitting frames is always measurable; a run of non-fitting frames never is.
+        expect(armDrift(frames, { mirrored }).status === 'ok').toBe(fitsAll);
+        const f = frames[0]!;
+        expect(armFit(null)).toBe('shoulders');
+        expect(armFit({ ...f, shoulder11: null })).toBe('shoulders');
+        expect(armFit({ ...f, shoulder12: null, wrist15: null })).toBe('shoulders');
+        if (armFit(f) === 'ok') {
+          expect(armFit({ ...f, wrist15: null })).toBe('wrists');
+          expect(armFit({ ...f, wrist16: null })).toBe('wrists');
+        }
       }),
       FEW
     );

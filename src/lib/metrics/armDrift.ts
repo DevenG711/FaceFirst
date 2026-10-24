@@ -40,6 +40,22 @@ const usable = (p: PoseLandmark | null): p is PoseLandmark =>
 
 const tmp: Point = { x: 0, y: 0 };
 
+/**
+ * Framing state of one frame, for the pre-capture "fit" check:
+ * - `shoulders`: no pose, or the shoulders are missing / unusable (step back).
+ * - `wrists`: shoulders are fine but at least one wrist is missing / unusable (hold both arms out).
+ * - `ok`: the frame is one `armDrift` would count.
+ */
+export type ArmFit = 'ok' | 'shoulders' | 'wrists';
+
+export function armFit(f: ArmFrameInput | null): ArmFit {
+  if (!f || !usable(f.shoulder11) || !usable(f.shoulder12) || !poseFrame(f.shoulder11, f.shoulder12)) {
+    return 'shoulders';
+  }
+  if (!usable(f.wrist15) || !usable(f.wrist16)) return 'wrists';
+  return 'ok';
+}
+
 /** Drop of one wrist between the first and last `k` samples, floored at 0 (rising is not drift). */
 function drop(ys: readonly number[], k: number): number {
   return Math.max(0, median(ys.slice(-k)) - median(ys.slice(0, k)));
@@ -57,13 +73,12 @@ export function armDrift(frames: readonly (ArmFrameInput | null)[], { mirrored }
   let lastUsable = -1;
   for (let i = 0; i < frames.length; i++) {
     const f = frames[i]!;
-    if (!f || !usable(f.shoulder11) || !usable(f.shoulder12) || !usable(f.wrist15) || !usable(f.wrist16)) continue;
-    const frame = poseFrame(f.shoulder11, f.shoulder12);
-    if (!frame) continue;
+    if (armFit(f) !== 'ok') continue;
+    const frame = poseFrame(f!.shoulder11!, f!.shoulder12!)!;
     if (firstUsable === -1) firstUsable = i;
     lastUsable = i;
-    yA.push(normalizePoint(f.wrist16, frame, tmp).y);
-    yB.push(normalizePoint(f.wrist15, frame, tmp).y);
+    yA.push(normalizePoint(f!.wrist16!, frame, tmp).y);
+    yB.push(normalizePoint(f!.wrist15!, frame, tmp).y);
   }
   const n = yA.length;
   if (n < QUALITY.MIN_ARM_FRAMES) return poorQuality('arm');
