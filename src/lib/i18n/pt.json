@@ -4,7 +4,87 @@
   },
   "home": {
     "title": "FaceFirst",
+    "languageName": "Português",
+    "language": "Idioma",
+    "tagline": "Uma verificação de 60 segundos de sinais de alerta de AVC.",
+    "timeNoticed": {
+      "label": "Quando os sintomas começaram?",
+      "hint": "Os paramédicos precisam deste horário. Escolha seu melhor palpite.",
+      "justNow": "Agora mesmo",
+      "lastHour": "Na última hora",
+      "oneToThreeHours": "Há 1 a 3 horas",
+      "moreThanThreeHours": "Há mais de 3 horas",
+      "notSure": "Não tenho certeza"
+    },
+    "start": "Começar a verificação",
+    "baseline": "Gravar uma referência",
+    "voice": {
+      "welcome": "Bem-vindo ao FaceFirst. Se você acha que alguém está tendo um AVC, ligue para o 911 agora. Você também pode tocar em Começar a verificação."
+    },
     "disclaimer": "O FaceFirst é um protótipo apenas para demonstração. Não é um dispositivo médico e não diagnostica AVC. O uso comercial exigiria validação clínica e revisão da FDA."
+  },
+  "check": {
+    "common": {
+      "checking": "Verificando…",
+      "complete": "Verificação concluída",
+      "skip": "Pular esta verificação",
+      "next": "Próximo"
+    },
+    "coach": {
+      "moveCloser": "Chegue mais perto",
+      "faceCamera": "Olhe para a câmera",
+      "moreLight": "Precisa de mais luz",
+      "holdStill": "Fique parado"
+    },
+    "camera": {
+      "label": "Visualização da câmera",
+      "progress": "Progresso da verificação",
+      "starting": "Ligando a câmera…",
+      "denied": "Não conseguimos usar a câmera. Você pode pular esta verificação. Se você notou sintomas repentinos, ligue para o 911.",
+      "unsupported": "Este navegador não consegue usar a câmera. Você pode pular esta verificação. Se você notou sintomas repentinos, ligue para o 911."
+    },
+    "face": {
+      "title": "Verificação do rosto",
+      "instructions": "Olhe para a câmera e dê um grande sorriso. Vamos verificar se um lado do rosto está caído.",
+      "start": "Começar a verificação do rosto"
+    },
+    "arm": {
+      "title": "Verificação dos braços",
+      "instructions": "Estenda os dois braços para a frente, com as palmas para cima. Mantenha-os assim. Vamos verificar se um braço cai.",
+      "start": "Começar a verificação dos braços"
+    },
+    "speech": {
+      "title": "Verificação da fala",
+      "instructions": "Peça para a pessoa ler esta frase em voz alta:",
+      "phrase": "O céu está azul hoje.",
+      "start": "Toque e fale",
+      "listening": "Ouvindo…",
+      "heard": "Ouvimos:",
+      "noSpeech": "Não ouvimos nada. Tente de novo ou responda à pergunta abaixo.",
+      "micDenied": "Não conseguimos usar o microfone. Responda à pergunta abaixo.",
+      "unsupported": "Este navegador não consegue ouvir a fala. Responda à pergunta abaixo.",
+      "disclosure": "O reconhecimento de voz do Chrome envia o áudio para os servidores do Google.",
+      "caregiver": {
+        "question": "A fala da pessoa está clara?",
+        "slurred": "Fala arrastada ou confusa",
+        "noChange": "Não percebo nenhuma mudança",
+        "notSure": "Não tenho certeza"
+      }
+    },
+    "befast": {
+      "title": "Algumas perguntas rápidas",
+      "progress": "Pergunta {n} de {total}",
+      "balance": "A pessoa teve de repente problemas de equilíbrio ou coordenação?",
+      "vision": "A pessoa teve de repente perda ou alteração da visão em um ou nos dois olhos?",
+      "headache": "A pessoa teve de repente uma dor de cabeça forte sem causa conhecida?",
+      "numbness": "A pessoa sentiu de repente dormência ou fraqueza, principalmente em um lado do corpo?",
+      "answer": {
+        "yes": "Sim",
+        "no": "Não",
+        "unsure": "Não tenho certeza"
+      },
+      "back": "Voltar"
+    }
   },
   "result": {
     "call911": {

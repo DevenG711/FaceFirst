@@ -50,6 +50,31 @@ a.button {
   font: inherit;
 }
 
+/* Shared action buttons. Never green; red is reserved for the 911 button and CALL_911_NOW. */
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0 1rem;
+  border: 2px solid var(--color-fg);
+  border-radius: 8px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button.primary {
+  background: var(--color-fg);
+  color: var(--color-bg);
+  font-size: 24px;
+}
+
+.button.secondary {
+  background: var(--color-bg);
+  color: var(--color-fg);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -4,7 +4,87 @@
   },
   "home": {
     "title": "FaceFirst",
+    "languageName": "English",
+    "language": "Language",
+    "tagline": "A 60-second stroke-warning check.",
+    "timeNoticed": {
+      "label": "When did the symptoms start?",
+      "hint": "Paramedics need this time. Pick your best guess.",
+      "justNow": "Just now",
+      "lastHour": "Within the last hour",
+      "oneToThreeHours": "1 to 3 hours ago",
+      "moreThanThreeHours": "More than 3 hours ago",
+      "notSure": "Not sure"
+    },
+    "start": "Start check",
+    "baseline": "Record a baseline",
+    "voice": {
+      "welcome": "Welcome to FaceFirst. If you think someone is having a stroke, call 911 now. You can also tap Start check."
+    },
     "disclaimer": "FaceFirst is a prototype for demonstration only. It is not a medical device and does not diagnose stroke. Commercial use would require clinical validation and FDA review."
+  },
+  "check": {
+    "common": {
+      "checking": "Checking…",
+      "complete": "Check complete",
+      "skip": "Skip this check",
+      "next": "Next"
+    },
+    "coach": {
+      "moveCloser": "Move closer",
+      "faceCamera": "Face the camera",
+      "moreLight": "More light",
+      "holdStill": "Hold still"
+    },
+    "camera": {
+      "label": "Camera view",
+      "progress": "Check progress",
+      "starting": "Starting the camera…",
+      "denied": "We can't use the camera. You can skip this check. If you noticed sudden symptoms, call 911.",
+      "unsupported": "This browser can't use the camera. You can skip this check. If you noticed sudden symptoms, call 911."
+    },
+    "face": {
+      "title": "Face check",
+      "instructions": "Look at the camera and smile big. We'll check if one side of the face droops.",
+      "start": "Start face check"
+    },
+    "arm": {
+      "title": "Arm check",
+      "instructions": "Hold both arms straight out in front of you, palms up. Keep them there. We'll check if one arm drifts down.",
+      "start": "Start arm check"
+    },
+    "speech": {
+      "title": "Speech check",
+      "instructions": "Ask them to read this sentence out loud:",
+      "phrase": "The sky is blue today.",
+      "start": "Tap and speak",
+      "listening": "Listening…",
+      "heard": "We heard:",
+      "noSpeech": "We didn't hear anything. Try again, or answer the question below.",
+      "micDenied": "We can't use the microphone. Answer the question below instead.",
+      "unsupported": "This browser can't listen to speech. Answer the question below instead.",
+      "disclosure": "Speech recognition in Chrome sends audio to Google's servers.",
+      "caregiver": {
+        "question": "Does their speech sound clear?",
+        "slurred": "Slurred or wrong",
+        "noChange": "No change I can hear",
+        "notSure": "Not sure"
+      }
+    },
+    "befast": {
+      "title": "A few quick questions",
+      "progress": "Question {n} of {total}",
+      "balance": "Have they had sudden trouble with balance or coordination?",
+      "vision": "Have they had sudden vision loss or changes in one or both eyes?",
+      "headache": "Have they had a sudden severe headache with no known cause?",
+      "numbness": "Have they had sudden numbness or weakness, especially on one side?",
+      "answer": {
+        "yes": "Yes",
+        "no": "No",
+        "unsure": "Not sure"
+      },
+      "back": "Back"
+    }
   },
   "result": {
     "call911": {
