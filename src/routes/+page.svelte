@@ -113,22 +113,26 @@
 
   .language button {
     flex: 1 1 0;
+    min-height: var(--tap-min);
     padding: 0 0.75rem;
-    border: 2px solid var(--color-fg);
-    border-radius: 8px;
-    background: var(--color-bg);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-surface);
     color: var(--color-fg);
     cursor: pointer;
+    transition: background 0.12s ease, border-color 0.12s ease;
   }
 
   .language button[aria-pressed='true'] {
     background: var(--color-fg);
     color: var(--color-bg);
+    border-color: var(--color-fg);
     font-weight: 700;
   }
 
   .hint {
     margin: 0 0 0.5rem;
+    color: var(--color-muted);
   }
 
   .option {
@@ -136,16 +140,19 @@
     align-items: center;
     gap: 0.75rem;
     min-height: var(--tap-min);
-    padding: 0 1rem;
+    padding: 0.5rem 1rem;
     margin-bottom: 0.5rem;
-    border: 2px solid var(--color-fg);
-    border-radius: 8px;
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-surface);
     cursor: pointer;
+    transition: border-color 0.12s ease, box-shadow 0.12s ease;
   }
 
   .option:has(input:checked) {
     border-color: var(--color-focus);
     box-shadow: inset 0 0 0 2px var(--color-focus);
+    background: var(--color-bg);
     font-weight: 700;
   }
 

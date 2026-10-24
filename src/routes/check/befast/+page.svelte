@@ -8,6 +8,7 @@
   import { t } from '#lib/i18n/index.ts';
   import { BEFAST_QUESTIONS, beFast, locale, setBeFastAnswer } from '#lib/stores/session.ts';
   import { speak } from '#lib/voice.ts';
+  import FlowProgress from '#lib/components/FlowProgress.svelte';
   import type { Answer } from '#lib/triage/types.ts';
 
   const NEXT = '/result';
@@ -36,6 +37,7 @@
 </script>
 
 <div class="check">
+  <FlowProgress locale={$locale} step={4} />
   <h1>{t($locale, 'check.befast.title')}</h1>
 
   <div class="progress">

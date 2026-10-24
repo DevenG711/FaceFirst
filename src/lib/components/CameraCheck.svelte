@@ -9,17 +9,25 @@
   import CameraView from '#lib/components/CameraView.svelte';
   import { locale, setCheck, unavailableCheck } from '#lib/stores/session.ts';
   import { speak } from '#lib/voice.ts';
+  import FlowProgress from '#lib/components/FlowProgress.svelte';
+  import type { CheckResult } from '#lib/triage/types.ts';
 
   let {
     id,
     next,
     duration,
+    step,
   }: {
     id: 'face' | 'arm';
     /** Route to go to once the check is done or skipped. */
     next: string;
     duration?: number;
+    /** 1-based position in the 4-step check flow. */
+    step: number;
   } = $props();
+
+  // Arm drift needs a longer hold than the face check (QUALITY.MIN_ARM_FRAMES is higher).
+  const captureMs = $derived(duration ?? (id === 'arm' ? 10000 : 5000));
 
   let phase = $state<'ready' | 'checking' | 'done'>('ready');
 
@@ -31,11 +39,10 @@
     instruct();
   }
 
-  function complete() {
-    // TODO(vision): store the measured score and side from lib/metrics (faceAsymmetry.ts /
-    // armDrift.ts). Until then the check records as unavailable, which can only make the
-    // result more cautious.
-    setCheck(unavailableCheck(id));
+  function complete(result: CheckResult) {
+    // Store the measured score and side from the vision layer. A poor_quality or unavailable
+    // result flows straight into the engine, which can only make the outcome MORE cautious.
+    setCheck(result);
     phase = 'done';
     setTimeout(() => goto(next), 1000);
   }
@@ -47,6 +54,7 @@
 </script>
 
 <div class="check">
+  <FlowProgress locale={$locale} {step} />
   <h1>{t($locale, `check.${id}.title`)}</h1>
   <p class="instructions">{t($locale, `check.${id}.instructions`)}</p>
 
@@ -54,7 +62,7 @@
     guide={id}
     locale={$locale}
     active={phase === 'checking'}
-    {duration}
+    duration={captureMs}
     coaching={t($locale, phase === 'checking' ? 'check.coach.holdStill' : 'check.coach.faceCamera')}
     oncomplete={complete}
   />

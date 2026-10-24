@@ -3,4 +3,4 @@
 </script>
 
 <!-- Arm drift needs longer than the face check to show. -->
-<CameraCheck id="arm" next="/check/speech" duration={10000} />
+<CameraCheck id="arm" next="/check/speech" duration={10000} step={2} />

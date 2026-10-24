@@ -28,7 +28,8 @@
       "checking": "Verificando…",
       "complete": "Verificação concluída",
       "skip": "Pular esta verificação",
-      "next": "Próximo"
+      "next": "Próximo",
+      "step": "Etapa {n} de {total}"
     },
     "coach": {
       "moveCloser": "Chegue mais perto",

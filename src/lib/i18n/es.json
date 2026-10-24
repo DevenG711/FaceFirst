@@ -28,7 +28,8 @@
       "checking": "Revisando…",
       "complete": "Revisión terminada",
       "skip": "Saltar esta revisión",
-      "next": "Siguiente"
+      "next": "Siguiente",
+      "step": "Paso {n} de {total}"
     },
     "coach": {
       "moveCloser": "Acérquese más",
