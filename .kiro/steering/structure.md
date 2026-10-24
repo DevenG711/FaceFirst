@@ -7,19 +7,21 @@ inclusion: always
 ```
 /.kiro/
   steering/  product.md  tech.md  structure.md  safety.md  design.md
-  specs/     triage-engine/  face-check/  arm-check/  speech-check/  ems-card/  baseline/
+  specs/     triage-engine/  metrics/  face-check/  arm-check/  speech-check/  ems-card/  baseline/
   hooks/
   settings/mcp.json
 /src/
   lib/vision/    faceLandmarker.ts  poseLandmarker.ts  quality.ts  camera.ts
-  lib/metrics/   faceAsymmetry.ts  armDrift.ts  speech.ts  geometry.ts
-  lib/triage/    engine.ts  thresholds.ts  types.ts  copy.ts
+  lib/metrics/   faceAsymmetry.ts  armDrift.ts  speech.ts  geometry.ts  checkResult.ts
+  lib/triage/    engine.ts  thresholds.ts  types.ts  copy.ts  bannedWords.ts  bannedWords.json
   lib/storage/   baselines.ts
   lib/i18n/      en.json  es.json  pt.json
   lib/components/  (shared UI, incl. Call911Button.svelte)
   routes/        +layout.svelte  +page.svelte (home)  check/  result/  card/  baseline/
 /tests/
-  metrics.property.test.ts  triage.property.test.ts  copy-safety.test.ts
+  arbitraries.ts  (shared fast-check generators for TriageInput)
+  metrics.property.test.ts  (geometry)  metricChecks.property.test.ts  (face, arm, speech)
+  triage.property.test.ts  copy-safety.test.ts  scaffold.test.ts
 /docs/  KIRO_LOG.md  DEMO_SCRIPT.md
 README.md
 ```
