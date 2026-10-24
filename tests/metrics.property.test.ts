@@ -3,7 +3,9 @@ import { describe, expect, it } from 'vitest';
 import fc from 'fast-check';
 import {
   anatomicalSideOfA,
+  anatomicalSideOfB,
   faceFrame,
+  poseFrame,
   flipSide,
   frameFrom,
   normalizePoint,
@@ -126,5 +128,20 @@ describe('geometry: mirror → anatomical side', () => {
   it('raw camera: landmark 33 (image-left) is the person’s right; mirrored: their left', () => {
     expect(anatomicalSideOfA(false)).toBe('right');
     expect(anatomicalSideOfA(true)).toBe('left');
+    expect(anatomicalSideOfB(false)).toBe('left');
+    expect(anatomicalSideOfB(true)).toBe('right');
+  });
+});
+
+describe('geometry: pose frame orientation', () => {
+  it('an upright person (11 on image-right) gives zero roll, and a wrist below the shoulders has y > 0', () => {
+    // Image coordinates, y down. MediaPipe 12 (right shoulder) appears on image-left.
+    const s12 = { x: 200, y: 300 };
+    const s11 = { x: 400, y: 300 };
+    const f = poseFrame(s11, s12)!;
+    close(f.angle, 0);
+    const wrist = normalizePoint({ x: 420, y: 400 }, f);
+    expect(wrist.y).toBeGreaterThan(0);
+    close(wrist.y, 0.5);
   });
 });

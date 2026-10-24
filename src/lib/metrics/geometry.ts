@@ -4,7 +4,12 @@
 // Coordinates: pass PIXEL coordinates (MediaPipe x * videoWidth, y * videoHeight), not raw 0–1
 // landmarks, otherwise a non-square frame distorts distances. y points down, as in images.
 //
-// A "frame" is defined by two reference points A→B (outer eye corners 33→263, or shoulders 11→12):
+// MediaPipe labels landmarks by how the person APPEARS (facing the camera), so for an upright person:
+//   - Face: 33 / 61 (the model's "right" eye / mouth corner) are on image-left; 263 / 291 on image-right.
+//   - Pose: 12 / 16 (right shoulder / wrist) are on image-left; 11 / 15 (left) on image-right.
+// Side "A" below always means image-left (33, 61, 12, 16); side "B" means image-right.
+//
+// A "frame" is defined by two reference points A→B (outer eye corners 33→263, or shoulders 12→11):
 //   - origin: the midpoint of A and B          (translation invariance)
 //   - angle:  the roll of the A→B line         (roll invariance; after normalizing, A→B is horizontal)
 //   - scale:  |AB| (inter-ocular / shoulder width) (scale invariance; after normalizing, |AB| = 1)
@@ -59,9 +64,13 @@ export function frameFrom(a: Point, b: Point): Frame | null {
 /** Face frame from outer eye corners (landmarks 33 → 263): inter-ocular units, eye line horizontal. */
 export const faceFrame = (eye33: Point, eye263: Point): Frame | null => frameFrom(eye33, eye263);
 
-/** Pose frame from shoulders (landmarks 11 → 12): shoulder-width units, shoulder line horizontal. */
+/**
+ * Pose frame from the shoulders: shoulder-width units, shoulder line horizontal, y pointing down.
+ * Built 12 → 11 (image-left → image-right) on purpose: 11 is MediaPipe's LEFT shoulder, which is on
+ * image-right, so an 11 → 12 frame would rotate an upright person by π and turn "down" into "up".
+ */
 export const poseFrame = (shoulder11: Point, shoulder12: Point): Frame | null =>
-  frameFrom(shoulder11, shoulder12);
+  frameFrom(shoulder12, shoulder11);
 
 /** Maps p into `frame`: translate to the origin, rotate by −angle, divide by scale. Writes into `out`. */
 export function normalizePoint(p: Point, frame: Frame, out: Point = { x: 0, y: 0 }): Point {
@@ -105,9 +114,22 @@ export function toAnatomical(imageSide: Side, mirrored: boolean): Side {
 }
 
 /**
- * Anatomical side of reference point A (the first point of the frame, e.g. landmark 33 or 11).
+ * Anatomical side of side A (image-left: face landmarks 33 / 61, pose landmarks 12 / 16).
  * After normalizing, A sits at x = −0.5, i.e. image-left, so this is `toAnatomical('left', mirrored)`.
  */
 export function anatomicalSideOfA(mirrored: boolean): Side {
   return toAnatomical('left', mirrored);
 }
+
+/** Anatomical side of side B (image-right: face 263 / 291, pose 11 / 15). Always opposite to A. */
+export function anatomicalSideOfB(mirrored: boolean): Side {
+  return toAnatomical('right', mirrored);
+}
+
+/**
+ * Which side the MediaPipe blendshape suffix "Left" (mouthSmileLeft, eyeBlinkLeft, …) refers to.
+ * Blendshapes are computed from the same landmarks, whose "left" is the model's left, i.e. the side of
+ * 263 / 291 (side B). VERIFY LIVE: smile on one side only, unmirrored, and confirm `mouthSmileLeft` rises
+ * when the side on image-right smiles. If it is the other way round, change this one constant to 'A'.
+ */
+export const BLENDSHAPE_LEFT_IS_SIDE: 'A' | 'B' = 'B';
