@@ -32,6 +32,29 @@ export const QUALITY = {
   SILENCE_LEVEL: 0.02, // RMS amplitude (0–1) at or below which audio counts as silence. Uncalibrated placeholder.
   MIN_PAUSE_MS: 250, // silence shorter than this is not counted as a pause. Uncalibrated placeholder.
   MIN_LANDMARK_VISIBILITY: 0.5, // pose landmark visibility (0–1) below which a point is treated as missing. Uncalibrated placeholder.
+  /**
+   * Face-direction agreement gate. A real one-sided droop makes most per-frame readings lean the SAME
+   * way; a capture where the subject turned, talked, or was poorly tracked splits them, so the median
+   * can land near zero and hide a problem. When the signed readings agree on direction LESS than this
+   * fraction AND the score sits below FACE_AMBIGUOUS_MAX, the capture is ambiguous → poor_quality
+   * (retry), never a false low reading. A clear droop (score ≥ FACE_AMBIGUOUS_MAX) always passes
+   * through so a real escalation is never suppressed. Uncalibrated placeholder.
+   */
+  MIN_FACE_SIGN_AGREEMENT: 0.6, // 0.5 = a coin-flip split. Uncalibrated placeholder.
+  FACE_AMBIGUOUS_MAX: 0.08, // inter-ocular units; below the 0.12 flag threshold. Uncalibrated placeholder.
+  /**
+   * Noise floor for the direction-agreement gate. A per-frame signed reading only counts as "leaning"
+   * toward a side when its magnitude exceeds this; anything smaller is floating-point dust or a
+   * practically-symmetric frame and casts no vote. Without it, a symmetric face whose residuals are
+   * ±1e-14 would split sign and trip the gate. Uncalibrated placeholder.
+   */
+  FACE_LEAN_EPSILON: 1e-6, // inter-ocular units. Uncalibrated placeholder.
+  /**
+   * Arm-drift agreement gate. The drift difference is only trustworthy if enough valid frames span the
+   * whole hold. Below this fraction of frames usable across the capture, drift is noise → poor_quality.
+   * Uncalibrated placeholder.
+   */
+  MIN_ARM_FRAME_SPAN: 0.5, // fraction of the clip's frames that must be usable. Uncalibrated placeholder.
 } as const;
 
 /** Weights and windows used to turn raw measurements into scores in lib/metrics. UNCALIBRATED placeholders. */

@@ -1,6 +1,8 @@
 <!--
-  BE-FAST questions, one at a time. "Not sure" is stored as 'unsure', which the triage
-  engine does not treat as 'yes' (see .kiro/specs/triage-engine/design.md).
+  BE-FAST questions, one at a time. Optional and secondary: only reached when the sensor checks
+  found nothing (see /check/speech). Skipping keeps any answers already given and still lands on
+  a real triage result, never a reassuring one. "Not sure" is stored as 'unsure', which the
+  triage engine does not treat as 'yes' (see .kiro/specs/triage-engine/design.md).
 -->
 <script lang="ts">
   import { tick } from 'svelte';
@@ -39,6 +41,7 @@
 <div class="check">
   <FlowProgress locale={$locale} step={4} />
   <h1>{t($locale, 'check.befast.title')}</h1>
+  <p class="intro">{t($locale, 'check.befast.intro')}</p>
 
   <div class="progress">
     <p>
@@ -69,6 +72,9 @@
         {t($locale, 'check.befast.back')}
       </button>
     {/if}
+    <button type="button" class="button secondary skip" onclick={() => goto(NEXT)}>
+      {t($locale, 'check.befast.skip')}
+    </button>
   </div>
 </div>
 
@@ -82,8 +88,13 @@
 
   h1,
   h2,
+  .intro,
   .progress p {
     margin: 0;
+  }
+
+  .skip {
+    margin-top: 0.75rem;
   }
 
   /* Neutral progress dots, never green. */

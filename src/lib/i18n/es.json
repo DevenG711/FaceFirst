@@ -74,6 +74,7 @@
     },
     "befast": {
       "title": "Algunas preguntas rápidas",
+      "intro": "Algunas preguntas rápidas pueden revelar señales de alerta que la cámara no ve. Son opcionales.",
       "progress": "Pregunta {n} de {total}",
       "balance": "¿Ha tenido de repente problemas de equilibrio o coordinación?",
       "vision": "¿Ha perdido la vista de repente o ha notado cambios en uno o ambos ojos?",
@@ -84,7 +85,8 @@
         "no": "No",
         "unsure": "No estoy seguro"
       },
-      "back": "Atrás"
+      "back": "Atrás",
+      "skip": "Saltar las preguntas"
     }
   },
   "result": {
