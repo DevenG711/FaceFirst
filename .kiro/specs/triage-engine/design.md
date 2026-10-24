@@ -110,7 +110,7 @@ Design decision: with a baseline, a check is flagged if it exceeds either the ba
 | State | Title (en) | Body (en) | Color |
 |---|---|---|---|
 | `CALL_911_NOW` | "CALL 911 NOW" | "Warning signs of stroke were found: {reasons}. Note the time symptoms started." | act (red) |
-| `CANNOT_RULE_OUT` | "We can't rule out a stroke" | "This check cannot rule out a stroke. If you noticed sudden symptoms, call 911." + "Re-check in 5 minutes" | caution (amber) |
+| `CANNOT_RULE_OUT` | "We can't rule out a stroke" | "This check cannot rule out a stroke. If you noticed sudden symptoms, call 911." + action: "You can run this check again at any time. Don't wait if you have symptoms. Call 911." (never a timed re-check: safety.md §2) | caution (amber) |
 | `RETRY_CAPTURE` | "We couldn't get a clear reading" | "Please retry: {checks}. If you noticed sudden symptoms, call 911." | caution (amber) |
 
 ## Testing strategy
@@ -134,7 +134,7 @@ Properties (`tests/triage.property.test.ts`), each ≥ 1000 runs:
 | P9 | No findings, no poor_quality ⇒ `CANNOT_RULE_OUT` | 2.5 |
 
 Copy safety (`tests/copy-safety.test.ts`):
-- C1 [PBT]: for random `TriageInput` × locale, resolved copy contains no banned word (regex `\b…\b`, `iu` flags, per-locale list from `safety.md`).
+- C1 [PBT]: for random `TriageInput` × locale, resolved copy contains no banned word (`findBannedWords()` with no locale, i.e. every locale's list — the same Unicode whole-word matcher as `safety-lint.mjs`; JS `\b` is ASCII-only and must not be used).
 - C2 [PBT]: `CANNOT_RULE_OUT` and `RETRY_CAPTURE` copy contains the localized "call 911" line.
 - C3 (example): every key under `result.*` and `card.*` in all three JSON files passes the banned-word scan; all keys in `en.json` exist in `es.json` and `pt.json`.
 - C4 (example): a deliberately bad string ("You're fine") is caught, proving the scanner works.

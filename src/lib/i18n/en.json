@@ -5,5 +5,43 @@
   "home": {
     "title": "FaceFirst",
     "disclaimer": "FaceFirst is a prototype for demonstration only. It is not a medical device and does not diagnose stroke. Commercial use would require clinical validation and FDA review."
+  },
+  "result": {
+    "call911": {
+      "title": "CALL 911 NOW",
+      "body": "Warning signs of stroke were found: {reasons}. Note the time symptoms started."
+    },
+    "cannotRuleOut": {
+      "title": "We can't rule out a stroke",
+      "body": "This check cannot rule out a stroke. If you noticed sudden symptoms, call 911.",
+      "recheck": "You can run this check again at any time. Don't wait if you have symptoms. Call 911."
+    },
+    "retry": {
+      "title": "We couldn't get a clear reading",
+      "body": "Please retry: {checks}. If you noticed sudden symptoms, call 911."
+    },
+    "check": {
+      "face": "face check",
+      "arm": "arm check",
+      "speech": "speech check"
+    },
+    "reason": {
+      "check": {
+        "face": "uneven face movement",
+        "arm": "arm weakness or drift",
+        "speech": "unclear speech"
+      },
+      "befast": {
+        "balance": "sudden loss of balance",
+        "vision": "sudden vision changes",
+        "headache": "sudden severe headache",
+        "numbness": "sudden numbness or weakness"
+      },
+      "caregiver": {
+        "face_uneven": "someone reports an uneven face",
+        "arm_weak": "someone reports a weak arm",
+        "speech_wrong": "someone reports unclear speech"
+      }
+    }
   }
 }

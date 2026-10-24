@@ -22,11 +22,14 @@ if (!existsSync(bannedPath)) {
   process.exit(1);
 }
 const bannedByLocale = JSON.parse(read(bannedPath));
+// NFC + curly apostrophes -> "'". Keep identical to src/lib/triage/bannedWords.ts.
+const normalize = (s) => s.normalize('NFC').replace(/[‘’ʼ]/g, "'");
 const banned = [
   ...new Set(
     Object.entries(bannedByLocale)
       .filter(([k]) => !k.startsWith('_'))
       .flatMap(([, words]) => words)
+      .map(normalize)
   ),
 ];
 
@@ -36,7 +39,6 @@ const patterns = banned.map((w) => ({
   word: w,
   re: new RegExp(`(?<![\\p{L}\\p{N}])${escape(w)}(?![\\p{L}\\p{N}])`, 'iu'),
 }));
-const normalize = (s) => s.replace(/[\u2018\u2019\u02BC]/g, "'");
 
 function scanText(text, where) {
   const t = normalize(text);
