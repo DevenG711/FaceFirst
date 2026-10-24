@@ -1,126 +1,132 @@
 # Partner 1: Engine Track
 
-**Tool:** Kiro (Autopilot mode)
-**Budget:** ~3 credits for the full track, +1 buffer for fixes
-**Spec:** `.kiro/specs/triage-engine/tasks.md` — you own Tasks 1, 2, 3, 4, and the engine half of 7
+## Task breakdown
 
----
+### Task 1: Shared project scaffold, pushed to main
 
-## Step 0 — Manual setup (no AI, ~5 min)
+- Run `git status` and `git pull --rebase origin main` first. Never force-push.
+- Look up current versions with `npm view <pkg> version` and pin them exactly (no `^` or `~`):
+  - `@sveltejs/kit`, `svelte`, `vite`, `@sveltejs/vite-plugin-svelte`, `@sveltejs/adapter-static`, `typescript`, `svelte-check`, `tslib`
+  - `vitest`, `fast-check`
+  - `@mediapipe/tasks-vision`, `idb-keyval`
+- Scripts:
+  - `dev`, `build`, `preview`
+  - `check` (`svelte-check`)
+  - `test` (`vitest --run`)
+  - `lint:safety` (`node scripts/safety-lint.mjs`)
+- Config files:
+  - `svelte.config.js` with adapter-static and the fallback set
+  - `vite.config.ts` with a `test` block: include `tests/**/*.test.ts`, environment `node`
+  - `tsconfig.json` with `strict` and `resolveJsonModule`
+  - `src/app.html`, and `src/app.css` with the design tokens
+- App files:
+  - `src/routes/+layout.ts` (`prerender = true`)
+  - a minimal `+layout.svelte` that renders `Call911Button` first, then the slot
+  - `Call911Button.svelte` (`<a href="tel:911">`, label taken from i18n)
+  - a placeholder `+page.svelte` that shows `home.disclaimer`
+  - Mark the placeholders in comments as partner2-owned and free to replace.
+- Create `src/lib/i18n/{en,es,pt}.json` with `nav.call911` and `home.disclaimer`. The disclaimer is the exact text from `safety.md`, translated.
+- Add a smoke test (`tests/scaffold.test.ts`) that imports a JSON file. It proves Vitest and aliases work.
+- Verify: `npm install`, `npm run check`, `npm run build`, `npx vitest --run`, then the safety lint.
+- Commit `package.json` and `package-lock.json` together, then push.
 
-> **Done (superseded).** The full SvelteKit 3 scaffold is on `main`, with `package.json` covering both partners and the Vitest config in `vite.config.ts` (there is no `vitest.config.ts`). See the README's "Stack notes". The original instructions are kept below for reference only.
+**Demo:** partner2 pulls and `npm run dev` serves a page with the 911 button and the disclaimer. CI goes green.
 
-Before using any Kiro credits, set up the test tooling yourself. This is pure boilerplate.
+### Task 2: Triage types and thresholds
 
-1. Create `package.json` with `vitest` and `fast-check` as dev dependencies (pin exact versions, not ranges). Run:
+- Write `types.ts` exactly as in the design, including the `URGENCY` constant.
+- Write `thresholds.ts` with `POPULATION_THRESHOLD` and `BASELINE_DEVIATION_THRESHOLD`. Add a `QUALITY` block for the metrics constants (`MIN_FACE_FRAMES`, `MIN_ARM_FRAMES`, `MIN_SPEECH_MS`, `SILENCE_LEVEL`, `MIN_PAUSE_MS`).
+- Head the file with an UNCALIBRATED banner and give each constant a placeholder comment.
+- Write `tests/arbitraries.ts` (`arbCheckResult`, `arbTriageInput`).
 
-```powershell
-npm init -y
-npm install --save-dev vitest fast-check
-```
+**Demo:** `npm run check` passes and the safety lint passes the thresholds rule.
 
-2. Add the test script to `package.json`:
+### Task 3: Engine plus P1–P9
 
-```json
-"scripts": { "test": "vitest --run" }
-```
+- Implement `isFlagged()` (population threshold OR baseline deviation) and `triage()` per the design. Build `baselineComparisons` and set `colorToken` from the state.
+- Write `tests/triage.property.test.ts` with P1–P9, each with `numRuns: 1000`.
+- Add an example-based test that reads `engine.ts` and asserts it has no numeric literals other than 0 and 1 (Req 6.3).
 
-3. Create `vitest.config.ts` at repo root:
+**Demo:** `npx vitest --run` shows all nine properties passing.
 
-```ts
-import { defineConfig } from 'vitest/config';
+Commit and push.
 
-export default defineConfig({
-  test: { include: ['tests/**/*.test.ts'] },
-});
-```
+### Task 4: Banned-word matcher, result copy and copy-safety tests
 
-4. Create the `tests/` directory.
+- `bannedWords.ts` exports `findBannedWords(text, locale)`. It uses the same Unicode lookaround regex and curly-apostrophe normalization as the lint.
+- Add `result.*` keys in all three locales:
+  - title and body for each state
+  - a label for each reason: each check (side as a placeholder), BE-FAST, caregiver
+  - `result.recheck5min`, `result.call911Line`, check names
+- `copy.ts` exports `resultCopy(result, locale)`, which returns `{ titleKey, bodyKeys, actionKeys, params }`. Add a `t(locale, key, params)` resolver so tests can render the strings.
+- Write `tests/copy-safety.test.ts` with C1–C4.
 
-**Checkpoint:** `npx vitest --run` should run with 0 tests found and exit cleanly.
+**Demo:** the tests pass. Planting "You're fine" in `result.*` breaks both C3 and the lint, then revert it.
 
----
+Commit and push.
 
-## Step 1 — Kiro prompt: Types + Thresholds (Task 2)
+### Task 5: `geometry.ts` plus geometry properties
 
-Paste into Kiro:
+- Implement the pure functions listed under "How the metrics work". Reuse caller-supplied output buffers where it matters for hot loops.
+- Properties in `tests/metrics.property.test.ts`:
+  - derotating by the roll angle makes the eye line horizontal
+  - scaling is invariant: uniformly scaling all points leaves normalized values unchanged
+  - `toAnatomical` applied twice with flipped `mirrored` returns the original side
 
-```
-Implement Task 2 from the triage-engine spec. Create these two files exactly as specified in the design doc:
+**Demo:** the tests pass.
 
-1. src/lib/triage/types.ts — all types from the design.md "Types" section: CheckId, Side, CheckStatus, CheckResult, BeFastQuestion, Answer, CaregiverReport, TriageInput, TriageState, Reason, BaselineComparison, TriageResult, and the URGENCY const. Make show911 a literal `true` type and colorToken a union of 'act' | 'caution' (no green) so the compiler enforces the safety rules.
+### Task 6: `faceAsymmetry.ts`
 
-2. src/lib/triage/thresholds.ts — POPULATION_THRESHOLD and BASELINE_DEVIATION_THRESHOLD records per CheckId. Each must carry a comment marking it as an uncalibrated research placeholder per safety.md section 5.
+- Implement `faceAsymmetry(frames, { mirrored }) → CheckResult`. Each frame holds the 4 landmarks plus the 8 blendshapes.
+- Properties:
+  - score ≥ 0, and `null` unless status is `ok`
+  - invariant to translation, scale and roll
+  - a perfectly symmetric face scores near 0
+  - lowering one mouth corner never lowers the score (monotonic)
+  - drooping the anatomical left corner gives `side: 'left'` in both mirrored modes
+  - too few frames gives `poor_quality`
+- Pipe the result into `triage()` in one integration test: a large droop gives `CALL_911_NOW` with the correct side.
 
-After creating both files, run `npx tsc --noEmit` to confirm they compile.
-```
+Commit and push.
 
-**Unblocks:** Partner 2's `copy.ts` (they need the TriageResult type). Tell them when this is done.
+### Task 7: `armDrift.ts`
 
----
+- Implement `armDrift(frames, { mirrored }) → CheckResult`.
+- Properties:
+  - invariant to scale and translation
+  - equal drift on both arms scores near 0
+  - more drift on one arm never lowers the score
+  - side mapping is correct
+  - missing wrists or too few frames gives `poor_quality`
+- Add an integration test through `triage()`.
 
-## Step 2 — Kiro prompt: Engine (Task 3)
+Commit and push.
 
-Paste into Kiro:
+### Task 8: `speech.ts`
 
-```
-Implement Task 3 from the triage-engine spec. Create src/lib/triage/engine.ts with:
+- `speechScore(transcript, target) → CheckResult`. Also `speechTiming(amplitudes, sampleMs) → { speakingMs, pauseCount }`.
+- Properties:
+  - identical text scores 0
+  - case and punctuation don't matter
+  - the score is in [0, 1]
+  - dropping words never lowers the score
+  - an empty transcript gives `poor_quality`; no input gives `unavailable`
+  - pause count and speaking duration are non-negative
+- Add an integration test through `triage()`.
 
-- isFlagged(check, baseline): returns false if status !== 'ok'. Flags on population threshold OR baseline deviation (if a baseline exists for that check). Adding a baseline can only add flags, never remove them.
-- triage(input): collects reasons (flagged checks with side + basis, BE-FAST 'yes' answers, caregiver reports), then selects state: any reason → CALL_911_NOW; else any poor_quality → RETRY_CAPTURE with retryChecks populated; else CANNOT_RULE_OUT. Populate urgency, reasons, retryChecks, baselineComparisons, show911: true, and colorToken ('act' for CALL_911_NOW, 'caution' for the other two).
+Commit and push.
 
-Import all thresholds from thresholds.ts. Verify Task 3.3: no numeric threshold literals appear anywhere in engine.ts — all numbers must come from thresholds.ts.
+### Task 9: Docs and final push
 
-After creating the file, run `npx tsc --noEmit` to confirm it compiles.
-```
+- `.kiro/specs/metrics/`: requirements (EARS, PBT-tagged), design (input data contracts for partner2) and tasks, all ticked.
+- Tick the boxes in `.kiro/specs/triage-engine/tasks.md`.
+- `structure.md`: add the metrics spec and the `tests/arbitraries.ts` file.
+- `README.md`:
+  - the required disclaimer
+  - setup and test commands
+  - an ownership table (us: scaffold, triage, metrics; partner2: vision, storage, routes, components, the other specs)
+  - the input contracts partner2 calls
+- `KIRO_LOG.md`: entries for the scaffold, engine and metrics, including what went wrong.
+- Final run: `npm run check && npm run build && npx vitest --run && node scripts/safety-lint.mjs`, then commit and push to main.
 
----
-
-## Step 3 — Kiro prompt: Arbitraries + Property tests (Task 4)
-
-Paste into Kiro:
-
-```
-Implement Task 4 from the triage-engine spec.
-
-1. Create tests/arbitraries.ts with fast-check arbitraries:
-   - arbCheckResult(id): status in {ok, poor_quality, unavailable}; score fc.double({min:0, max:2, noNaN:true}) when ok else null; side in {left, right, null}.
-   - arbTriageInput: all three checks, random BE-FAST subset, random caregiver subset, baseline null or random partial record.
-
-2. Create tests/triage.property.test.ts covering properties P1–P9 from design.md, each with at least 1000 runs:
-   - P1: output state in the three allowed states; show911 === true; colorToken in {act, caution} and matches state
-   - P2: never throws; same input → deep-equal output
-   - P3: any flagged check / BE-FAST yes / caregiver report → CALL_911_NOW, reasons contain it
-   - P4: monotonicity — add one finding → urgency non-decreasing
-   - P5: monotonicity — increase one ok score → urgency non-decreasing
-   - P6: degrade one check ok → poor_quality → urgency non-decreasing
-   - P7: no findings + any poor_quality → RETRY_CAPTURE with correct retryChecks
-   - P8: adding a baseline → urgency non-decreasing
-   - P9: no findings, no poor_quality → CANNOT_RULE_OUT
-
-Run `npx vitest --run` after writing. All tests must pass. Fix any failures before finishing.
-```
-
----
-
-## Step 4 — Checkpoint (manual)
-
-Run the full suite and log the result:
-
-```powershell
-npx vitest --run
-```
-
-If all green, append an entry to `docs/KIRO_LOG.md` with the test count and pass/fail status.
-
-If there are failures you can't fix manually, use one more Kiro prompt:
-
-```
-Run `npx vitest --run` and fix all failing tests in the triage engine. Do not weaken, skip, or delete any safety test to make the build pass — fix the code instead.
-```
-
----
-
-## After you're done
-
-Your `tests/arbitraries.ts` is the merge point for Partner 2's copy-safety test C1. Let them know when it's committed so they can run their full suite.
+**Demo:** CI is green on main, and partner2 can call `faceAsymmetry(...)` and then `triage(...)` and then `resultCopy(...)` from the README alone.
