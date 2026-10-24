@@ -5,6 +5,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { t, LOCALES, type Locale } from '#lib/i18n/index.ts';
+  import FaceGuide from '#lib/components/FaceGuide.svelte';
   import {
     locale,
     symptomOnset,
@@ -28,149 +29,135 @@
   }
 </script>
 
-<div class="home">
-  <header>
-    <h1>{t($locale, 'home.title')}</h1>
-    <p class="tagline">{t($locale, 'home.tagline')}</p>
-  </header>
+<div class="split home">
+  <section>
+    <h1>{t($locale, 'home.headline')} <em>{t($locale, 'home.headlineEm')}</em></h1>
+    <p class="sub">{t($locale, 'home.sub')}</p>
 
-  <fieldset class="language">
-    <legend>{t($locale, 'home.language')}</legend>
-    {#each LOCALES as l (l)}
-      <button
-        type="button"
-        lang={l}
-        aria-pressed={$locale === l}
-        onclick={() => chooseLocale(l)}
-      >
-        {t(l, 'home.languageName')}
-      </button>
-    {/each}
-  </fieldset>
+    <div class="actions">
+      <a href="/check/face" class="btn btn-primary">
+        {t($locale, 'home.start')}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M5 12h14M13 6l6 6-6 6" />
+        </svg>
+      </a>
+    </div>
 
-  <fieldset class="onset">
-    <legend>{t($locale, 'home.timeNoticed.label')}</legend>
-    <p class="hint">{t($locale, 'home.timeNoticed.hint')}</p>
-    {#each SYMPTOM_ONSET_OPTIONS as option (option)}
-      <label class="option">
-        <input
-          type="radio"
-          name="onset"
-          value={option}
-          checked={$symptomOnset?.choice === option}
-          onchange={() => chooseOnset(option)}
-        />
-        {t($locale, `home.timeNoticed.${option}`)}
-      </label>
-    {/each}
-  </fieldset>
+    <fieldset class="chips">
+      <legend>
+        {t($locale, 'home.timeNoticed.label')}
+        <span class="small">· {t($locale, 'home.optional')}</span>
+      </legend>
+      {#each SYMPTOM_ONSET_OPTIONS as option (option)}
+        <label class="chip">
+          <input
+            type="radio"
+            name="onset"
+            value={option}
+            checked={$symptomOnset?.choice === option}
+            onchange={() => chooseOnset(option)}
+          />
+          <span>{t($locale, `home.timeNoticed.${option}`)}</span>
+        </label>
+      {/each}
+    </fieldset>
 
-  <nav class="actions">
-    <a class="button primary" href="/check/face">{t($locale, 'home.start')}</a>
-    <a class="button secondary" href="/baseline">{t($locale, 'home.baseline')}</a>
-  </nav>
+    <fieldset class="chips">
+      <legend>{t($locale, 'home.language')}</legend>
+      {#each LOCALES as l (l)}
+        <button type="button" class="chip" lang={l} aria-pressed={$locale === l} onclick={() => chooseLocale(l)}>
+          {t(l, 'home.languageName')}
+        </button>
+      {/each}
+    </fieldset>
 
-  <p class="disclaimer">{t($locale, 'home.disclaimer')}</p>
+    <a href="/baseline" class="btn btn-outline btn-small baseline">{t($locale, 'home.baseline')}</a>
+
+    <p class="small disclaimer">{t($locale, 'home.disclaimer')}</p>
+  </section>
+
+  <div class="panel illustration" aria-hidden="true">
+    <FaceGuide />
+  </div>
 </div>
 
 <style>
-  /* Fill the screen so the actions sit in the bottom half on phones (one-handed use). */
   .home {
+    align-items: flex-start;
+  }
+
+  .chips {
     display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    min-height: calc(100dvh - var(--tap-min) - 2rem);
-  }
-
-  h1 {
-    margin: 0;
-  }
-
-  .tagline {
-    margin: 0.25rem 0 0;
-  }
-
-  fieldset {
-    margin: 0;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 40px 0 0;
     padding: 0;
     border: 0;
   }
 
   legend {
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-  }
-
-  .language {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .language legend {
     width: 100%;
+    margin-bottom: 12px;
+    font-size: 1rem;
+    font-weight: 500;
   }
 
-  .language button {
-    flex: 1 1 0;
-    min-height: var(--tap-min);
-    padding: 0 0.75rem;
-    border: 2px solid var(--color-border);
-    border-radius: var(--radius);
-    background: var(--color-surface);
-    color: var(--color-fg);
-    cursor: pointer;
-    transition: background 0.12s ease, border-color 0.12s ease;
-  }
-
-  .language button[aria-pressed='true'] {
-    background: var(--color-fg);
-    color: var(--color-bg);
-    border-color: var(--color-fg);
-    font-weight: 700;
-  }
-
-  .hint {
-    margin: 0 0 0.5rem;
-    color: var(--color-muted);
-  }
-
-  .option {
-    display: flex;
+  .chip {
+    position: relative;
+    display: inline-flex;
     align-items: center;
-    gap: 0.75rem;
     min-height: var(--tap-min);
-    padding: 0.5rem 1rem;
-    margin-bottom: 0.5rem;
-    border: 2px solid var(--color-border);
-    border-radius: var(--radius);
-    background: var(--color-surface);
+    padding: 0 20px;
+    border: 2px solid var(--color-line);
+    border-radius: 28px;
+    background: transparent;
+    color: var(--color-fg);
+    font-size: 1rem;
     cursor: pointer;
-    transition: border-color 0.12s ease, box-shadow 0.12s ease;
   }
 
-  .option:has(input:checked) {
-    border-color: var(--color-focus);
-    box-shadow: inset 0 0 0 2px var(--color-focus);
-    background: var(--color-bg);
-    font-weight: 700;
-  }
-
-  .option input {
-    width: 1.5rem;
-    height: 1.5rem;
+  /* Radio inputs stay focusable and screen-reader visible; the pill is their visual. */
+  .chip input {
+    position: absolute;
+    inset: 0;
     margin: 0;
-    accent-color: var(--color-focus);
+    opacity: 0;
+    cursor: pointer;
   }
 
-  .actions {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin-top: auto;
+  .chip:has(input:focus-visible) {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 4px;
+  }
+
+  .chip:has(input:checked),
+  .chip[aria-pressed='true'] {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    font-weight: 600;
+  }
+
+  .baseline {
+    margin-top: 40px;
   }
 
   .disclaimer {
-    margin: 0;
+    margin: 32px 0 0;
+    max-width: 36rem;
+  }
+
+  .illustration {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 460px;
+    position: sticky;
+    top: 120px;
+  }
+
+  @media (max-width: 900px) {
+    .illustration {
+      display: none;
+    }
   }
 </style>

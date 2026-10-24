@@ -1,7 +1,6 @@
 <!--
   Call 911 control. Rendered once in src/routes/+layout.svelte so it is on every
   screen and first in tab order (.kiro/steering/safety.md §2). Never hide or disable it.
-  Scaffold placeholder for styling; partner2 owns and may restyle (keep href="tel:911").
 -->
 <script lang="ts">
   import { t, DEFAULT_LOCALE, type Locale } from '#lib/i18n/index.ts';
@@ -9,38 +8,29 @@
   let { locale = DEFAULT_LOCALE }: { locale?: Locale } = $props();
 </script>
 
-<a class="call911" href="tel:911">
-  <span class="glyph" aria-hidden="true">📞</span>
-  <span>{t(locale, 'nav.call911')}</span>
+<a class="btn btn-911-outline btn-small call911" href="tel:911">
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2" />
+  </svg>
+  {t(locale, 'nav.call911')}
 </a>
 
 <style>
   .call911 {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.6rem;
-    min-height: 60px;
-    min-width: 56px;
-    padding: 0 1rem;
-    background: var(--color-act);
-    color: var(--color-act-text);
-    font-weight: 800;
-    font-size: 26px;
-    letter-spacing: 0.01em;
-    text-decoration: none;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+    gap: 10px;
+    font-weight: 600;
   }
 
-  .glyph {
-    font-size: 24px;
-    line-height: 1;
-  }
-
-  .call911:active {
-    filter: brightness(0.94);
+  .call911 svg {
+    width: 22px;
+    height: 22px;
   }
 </style>

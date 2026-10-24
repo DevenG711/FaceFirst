@@ -21,7 +21,11 @@
     "voice": {
       "welcome": "Welcome to FaceFirst. If you think someone is having a stroke, call 911 now. You can also tap Start check."
     },
-    "disclaimer": "FaceFirst is a prototype for demonstration only. It is not a medical device and does not diagnose stroke. Commercial use would require clinical validation and FDA review."
+    "disclaimer": "FaceFirst is a prototype for demonstration only. It is not a medical device and does not diagnose stroke. Commercial use would require clinical validation and FDA review.",
+    "headline": "A quick stroke check.",
+    "headlineEm": "About one minute.",
+    "sub": "Uses your camera and microphone.",
+    "optional": "Optional"
   },
   "check": {
     "common": {
@@ -29,7 +33,9 @@
       "complete": "Check complete",
       "skip": "Skip this check",
       "next": "Next",
-      "step": "Step {n} of {total}"
+      "step": "Step {n} of {total}",
+      "back": "Back",
+      "seeResult": "See result"
     },
     "coach": {
       "moveCloser": "Move closer",
@@ -47,12 +53,16 @@
     "face": {
       "title": "Face check",
       "instructions": "Look at the camera and smile big. We'll check if one side of the face droops.",
-      "start": "Start face check"
+      "start": "Start face check",
+      "headline": "Look at the camera",
+      "headlineEm": "and smile."
     },
     "arm": {
       "title": "Arm check",
       "instructions": "Hold both arms straight out in front of you, palms up. Keep them there. We'll check if one arm drifts down.",
-      "start": "Start arm check"
+      "start": "Start arm check",
+      "headline": "Hold both arms out",
+      "headlineEm": "in front of you."
     },
     "speech": {
       "title": "Speech check",
@@ -72,7 +82,9 @@
         "slurred": "Slurred or wrong",
         "noChange": "No change I can hear",
         "notSure": "Not sure"
-      }
+      },
+      "headline": "Say this",
+      "headlineEm": "out loud."
     },
     "befast": {
       "title": "A few quick questions",
@@ -94,7 +106,7 @@
   "result": {
     "call911Line": "If you noticed sudden symptoms, call 911.",
     "call911": {
-      "title": "CALL 911 NOW",
+      "title": "Call 911 now.",
       "body": "Warning signs of stroke were found: {reasons}. Note the time symptoms started."
     },
     "cannotRuleOut": {
@@ -136,14 +148,37 @@
         "arm_weak": "someone reports a weak arm",
         "speech_wrong": "someone reports unclear speech"
       }
-    }
+    },
+    "status": {
+      "act": "Possible stroke signs",
+      "caution": "Stroke not ruled out",
+      "retry": "Some readings unclear"
+    },
+    "finding": {
+      "face": "Face",
+      "arm": "Arm",
+      "speech": "Voice"
+    },
+    "tag": {
+      "flagged": "Flagged",
+      "notFlagged": "Not flagged",
+      "retry": "Retry",
+      "notChecked": "Not checked"
+    },
+    "timeNoticed": "Time noticed",
+    "checkedAt": "Checked at",
+    "notDiagnosis": "This check does not diagnose stroke.",
+    "checkAgain": "Check again",
+    "moreQuestions": "Answer a few questions",
+    "retryCheck": "Retry {check}",
+    "close": "Close"
   },
   "baseline": {
     "title": "Record a baseline",
-    "intro": "Record a short, healthy video of your loved one now, while they are well. Later, a check can compare against their own normal face and arm movement.",
+    "intro": "Record a short video of your loved one on a typical day. Later, a check can compare against their own usual face and arm movement.",
     "note": "Nothing is uploaded. The recording stays on this device.",
     "start": "Start recording",
     "back": "Back to home",
-    "voice": "Record a short healthy video now. It stays on this device and is never uploaded."
+    "voice": "Record a short video on a typical day. It stays on this device and is never uploaded."
   }
 }

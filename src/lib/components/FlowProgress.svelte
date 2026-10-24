@@ -1,7 +1,6 @@
 <!--
-  Flow progress for the check sequence (face -> arm -> speech -> questions). Neutral dots only,
-  never green (.kiro/steering/design.md): a filled dot means "done", the current one is outlined,
-  future ones are faint. Purely informational; it never blocks or gates calling 911.
+  Step indicator for the check flow (face -> arms -> voice). Accent bars only, never green
+  (.kiro/steering/design.md). Purely informational; it never blocks or gates calling 911.
 -->
 <script lang="ts">
   import { t, type Locale } from '#lib/i18n/index.ts';
@@ -9,7 +8,7 @@
   let {
     locale,
     step,
-    total = 4,
+    total = 3,
   }: {
     locale: Locale;
     /** 1-based index of the current step. */
@@ -19,46 +18,40 @@
 </script>
 
 <div class="flow-progress">
-  <p class="label">{t(locale, 'check.common.step', { n: step, total })}</p>
-  <ol aria-hidden="true">
+  <span class="label">{t(locale, 'check.common.step', { n: step, total })}</span>
+  <span class="bars" aria-hidden="true">
     {#each Array(total) as _, i (i)}
-      <li class:done={i < step - 1} class:current={i === step - 1}></li>
+      <span class:on={i < step}></span>
     {/each}
-  </ol>
+  </span>
 </div>
 
 <style>
   .flow-progress {
     display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
   }
 
   .label {
-    margin: 0;
-    font-weight: 700;
+    font-size: 1rem;
+    color: var(--color-muted);
   }
 
-  ol {
+  .bars {
     display: flex;
-    gap: 0.5rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+    gap: 8px;
   }
 
-  li {
-    flex: 1;
-    height: 8px;
-    border-radius: 4px;
-    background: #e0e0e0; /* future step */
+  .bars span {
+    width: 48px;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--color-line);
   }
 
-  li.done {
-    background: #555555; /* completed; neutral gray, never green */
-  }
-
-  li.current {
-    background: var(--color-fg);
+  .bars span.on {
+    background: var(--color-accent);
   }
 </style>

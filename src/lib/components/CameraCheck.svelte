@@ -15,15 +15,18 @@
   let {
     id,
     next,
+    back = '/',
     duration,
     step,
   }: {
     id: 'face' | 'arm';
     /** Route to go to once the check is done or skipped. */
     next: string;
+    /** Route for the Back button. */
+    back?: string;
     duration?: number;
-    /** 1-based position in the 4-step check flow. */
-    step: number;
+    /** 1-based position in the check flow; omit for a check outside the main flow. */
+    step?: number;
   } = $props();
 
   // Arm drift needs a longer hold than the face check (QUALITY.MIN_ARM_FRAMES is higher).
@@ -53,65 +56,66 @@
   }
 </script>
 
-<div class="check">
+{#if step}
   <FlowProgress locale={$locale} {step} />
-  <h1>{t($locale, `check.${id}.title`)}</h1>
-  <p class="instructions">{t($locale, `check.${id}.instructions`)}</p>
+{/if}
 
+<h1>{t($locale, `check.${id}.headline`)} <em>{t($locale, `check.${id}.headlineEm`)}</em></h1>
+<p class="sub">{t($locale, `check.${id}.instructions`)}</p>
+
+<div class="camera">
   <CameraView
     guide={id}
     locale={$locale}
     active={phase === 'checking'}
     duration={captureMs}
-    coaching={t($locale, phase === 'checking' ? 'check.coach.holdStill' : 'check.coach.faceCamera')}
+    coaching={phase === 'done'
+      ? t($locale, 'check.common.complete')
+      : t($locale, phase === 'checking' ? 'check.coach.holdStill' : 'check.coach.faceCamera')}
     oncomplete={complete}
   />
-
-  <p class="status" aria-live="polite">
-    {#if phase === 'checking'}
-      {t($locale, 'check.common.checking')}
-    {:else if phase === 'done'}
-      {t($locale, 'check.common.complete')}
-    {/if}
-  </p>
-
-  <div class="actions">
-    {#if phase === 'ready'}
-      <button type="button" class="button primary" onclick={begin}>
-        {t($locale, `check.${id}.start`)}
-      </button>
-    {/if}
-    {#if phase !== 'done'}
-      <button type="button" class="button secondary" onclick={skip}>
-        {t($locale, 'check.common.skip')}
-      </button>
-    {/if}
-  </div>
 </div>
 
+<p class="sr-only" aria-live="polite">
+  {#if phase === 'checking'}
+    {t($locale, 'check.common.checking')}
+  {:else if phase === 'done'}
+    {t($locale, 'check.common.complete')}
+  {/if}
+</p>
+
+<div class="actions between">
+  <a href={back} class="btn btn-outline">{t($locale, 'check.common.back')}</a>
+  {#if phase === 'ready'}
+    <button type="button" class="btn btn-primary" onclick={begin}>
+      {t($locale, `check.${id}.start`)}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M5 12h14M13 6l6 6-6 6" />
+      </svg>
+    </button>
+  {/if}
+</div>
+
+{#if phase !== 'done'}
+  <button type="button" class="skip" onclick={skip}>{t($locale, 'check.common.skip')}</button>
+{/if}
+
 <style>
-  .check {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    min-height: calc(100dvh - var(--tap-min) - 2rem);
+  .camera {
+    margin-top: 36px;
   }
 
-  h1,
-  .instructions,
-  .status {
-    margin: 0;
-  }
-
-  .status {
-    font-weight: 700;
-    min-height: 1.5em;
-  }
-
-  .actions {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin-top: auto;
+  .skip {
+    display: block;
+    min-height: var(--tap-min);
+    margin: 16px auto 0;
+    padding: 0 16px;
+    border: 0;
+    background: none;
+    color: var(--color-muted);
+    font-size: 1rem;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    cursor: pointer;
   }
 </style>

@@ -8,7 +8,6 @@
 -->
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { get } from 'svelte/store';
   import { goto } from '$app/navigation';
   import { t } from '#lib/i18n/index.ts';
   import {
@@ -19,21 +18,13 @@
     words,
     type SpeechAcoustics,
   } from '#lib/metrics/speech.ts';
-  import { triage } from '#lib/triage/engine.ts';
   import {
     ACOUSTIC_PARAMS,
     LISTEN_PARAMS,
     POPULATION_THRESHOLD,
     QUALITY,
   } from '#lib/triage/thresholds.ts';
-  import {
-    caregiverReports,
-    checks,
-    locale,
-    setCaregiverReport,
-    setCheck,
-    unavailableCheck,
-  } from '#lib/stores/session.ts';
+  import { locale, setCaregiverReport, setCheck, unavailableCheck } from '#lib/stores/session.ts';
   import { speak, VOICE_LANG } from '#lib/voice.ts';
   import FlowProgress from '#lib/components/FlowProgress.svelte';
 
@@ -99,6 +90,17 @@
     phase === 'unsupported' || phase === 'micDenied' || phase === 'noSpeech' || phase === 'unclear'
   );
 
+  // --- Wave bars: the most recent mic levels while listening, relative to the loudest so far ---
+  const BARS = 22;
+  // Resting shape from the design, shown (still) when not listening.
+  const REST = [14, 22, 34, 50, 72, 58, 44, 80, 96, 70, 52, 88, 100, 76, 54, 82, 64, 46, 60, 40, 28, 20];
+  let live = $state<number[]>([]);
+  const barHeights = $derived(
+    phase === 'listening' && live.length > 0
+      ? Array.from({ length: BARS }, (_, i) => 8 + 92 * (live[live.length - BARS + i] ?? 0))
+      : REST.map((h) => h * 0.35)
+  );
+
   // --- Amplitude capture: RMS of the mic signal every ACOUSTIC_PARAMS.SAMPLE_MS while listening ---
   let amplitudes: number[] = [];
   let stopAudio = () => {};
@@ -135,6 +137,7 @@
         const level = rms(frame);
         samples.push(level);
         peak = Math.max(peak, level);
+        live = [...live.slice(1 - BARS), peak > 0 ? level / peak : 0];
         // Same adaptive floor as the metric (voicedFloor), using the loudest level so far.
         if (level > Math.max(QUALITY.SILENCE_LEVEL, ACOUSTIC_PARAMS.RELATIVE_SILENCE * peak)) onVoice();
       }, ACOUSTIC_PARAMS.SAMPLE_MS);
@@ -263,6 +266,7 @@
     };
 
     phase = 'listening';
+    live = [];
     void startAudio(voice);
     rec.start();
   }
@@ -311,54 +315,35 @@
   }
 
   /**
-   * Sensor-first routing. A preliminary triage on the sensor checks and caregiver reports (no
-   * BE-FAST answers yet; baseline null, as on /result) decides whether the questions are needed:
-   * any finding already means CALL_911_NOW, so go straight to the result. Otherwise offer the
-   * optional questions, which can only add findings, never remove them.
+   * Main flow is face -> arms -> voice -> result. The optional BE-FAST questions are offered from the
+   * amber result screen, where they can only add findings, never remove them.
    */
-  function next() {
-    const preliminary = triage({
-      checks: get(checks),
-      beFast: {},
-      caregiverReports: get(caregiverReports),
-      baseline: null,
-    });
-    goto(preliminary.state === 'CALL_911_NOW' ? '/result' : '/check/befast');
-  }
+  const next = () => goto('/result');
 </script>
 
 <div class="check">
   <FlowProgress locale={$locale} step={3} />
-  <h1>{t($locale, 'check.speech.title')}</h1>
-  <p class="instructions">{t($locale, 'check.speech.instructions')}</p>
-  <p class="phrase" lang={$locale}>{t($locale, 'check.speech.phrase')}</p>
+  <h1>{t($locale, 'check.speech.headline')} <em>{t($locale, 'check.speech.headlineEm')}</em></h1>
+  <p class="sub">{t($locale, 'check.speech.instructions')}</p>
 
-  {#if phase !== 'unsupported'}
-    <p class="disclosure">{t($locale, 'check.speech.disclosure')}</p>
-    <button
-      type="button"
-      class="button primary"
-      onclick={listen}
-      disabled={phase === 'listening' || phase === 'micDenied'}
-    >
-      {t($locale, 'check.speech.start')}
-    </button>
-  {/if}
+  <div class="panel quote">
+    <p lang={$locale}>“{t($locale, 'check.speech.phrase')}”</p>
+  </div>
 
-  {#if phase === 'listening'}
-    <button type="button" class="button secondary" onclick={() => endAttempt()}>
-      {t($locale, 'check.speech.done')}
-    </button>
-  {/if}
+  <div class="wave" class:live={phase === 'listening'} aria-hidden="true">
+    {#each barHeights as h, i (i)}
+      <i style:height="{h}px"></i>
+    {/each}
+  </div>
 
   <div class="status" aria-live="polite">
     {#if phase === 'listening'}
-      <p>{t($locale, 'check.speech.listening')}</p>
+      <p><span class="dot pulse"></span> {t($locale, 'check.speech.listening')}</p>
     {:else if phase === 'heard'}
       <p>{t($locale, 'check.common.complete')}</p>
-      <p>{t($locale, 'check.speech.heard')} “{heard}”</p>
+      <p class="small">{t($locale, 'check.speech.heard')} “{heard}”</p>
     {:else if phase !== 'ready'}
-      <p>{t($locale, `check.speech.${phase}`)}</p>
+      <p class="caution">{t($locale, `check.speech.${phase}`)}</p>
     {/if}
   </div>
 
@@ -404,7 +389,7 @@
       {#each JUDGMENTS as answer (answer)}
         <button
           type="button"
-          class="button secondary"
+          class="btn btn-outline btn-wide"
           aria-pressed={judgment === answer}
           onclick={() => judge(answer)}
         >
@@ -414,86 +399,136 @@
     </fieldset>
   {/if}
 
-  <div class="actions">
-    <button type="button" class="button secondary" onclick={next}>
-      {t($locale, 'check.common.next')}
-    </button>
+  <div class="actions between">
+    <a href="/check/arm" class="btn btn-outline">{t($locale, 'check.common.back')}</a>
+
+    {#if phase === 'listening'}
+      <button type="button" class="btn btn-primary" onclick={() => endAttempt()}>
+        {t($locale, 'check.speech.done')}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10" /></svg>
+      </button>
+    {:else if phase === 'heard' || phase === 'unsupported' || phase === 'micDenied'}
+      <button type="button" class="btn btn-primary" onclick={next}>
+        {t($locale, 'check.common.seeResult')}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+      </button>
+    {:else}
+      <button type="button" class="btn btn-primary" onclick={listen}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3" /></svg>
+        {t($locale, 'check.speech.start')}
+      </button>
+    {/if}
   </div>
+
+  {#if phase === 'heard'}
+    <button type="button" class="link" onclick={listen}>{t($locale, 'check.speech.start')}</button>
+  {:else if phase === 'noSpeech' || phase === 'unclear'}
+    <button type="button" class="link" onclick={next}>{t($locale, 'check.common.seeResult')}</button>
+  {/if}
+
+  {#if phase !== 'unsupported'}
+    <p class="small disclosure">{t($locale, 'check.speech.disclosure')}</p>
+  {/if}
 </div>
 
 <style>
-  .check {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    min-height: calc(100dvh - var(--tap-min) - 2rem);
+  .quote {
+    margin-top: 36px;
+    padding: 44px 40px;
   }
 
-  h1,
-  .instructions,
+  .quote p {
+    margin: 0;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(2.2rem, 5vw, 3.2rem);
+    line-height: 1.15;
+  }
+
+  .wave {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    height: 110px;
+    margin-top: 36px;
+  }
+
+  .wave i {
+    display: block;
+    width: 5px;
+    border-radius: 3px;
+    background: var(--color-line);
+    transition: height 0.05s linear;
+  }
+
+  .wave.live i {
+    background: var(--color-accent);
+  }
+
+  .status {
+    min-height: 1.5em;
+    margin-top: 12px;
+    text-align: center;
+  }
+
   .status p {
     margin: 0;
   }
 
-  .phrase {
-    margin: 0;
-    padding: 1rem;
-    border: 2px solid var(--color-fg);
-    border-radius: 8px;
-    font-size: 32px;
-    font-weight: 700;
-    text-align: center;
-  }
-
-  .disclosure {
-    margin: 0;
-  }
-
-  .status {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    font-weight: 700;
-    min-height: 1.5em;
-  }
-
-  .button:disabled {
-    opacity: 0.6;
-    cursor: default;
+  .status .caution {
+    color: var(--color-caution-soft);
   }
 
   .caregiver {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    margin: 0;
+    gap: 12px;
+    margin: 32px 0 0;
     padding: 0;
     border: 0;
   }
 
   legend {
-    font-weight: 700;
-    margin-bottom: 0.5rem;
+    margin-bottom: 12px;
+    font-size: 1.1rem;
+    font-weight: 500;
   }
 
-  .caregiver .button[aria-pressed='true'] {
-    border-color: var(--color-focus);
-    box-shadow: inset 0 0 0 2px var(--color-focus);
+  .caregiver .btn[aria-pressed='true'] {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
   }
 
-  .actions {
-    margin-top: auto;
+  .link {
+    display: block;
+    min-height: var(--tap-min);
+    margin: 16px auto 0;
+    padding: 0 16px;
+    border: 0;
+    background: none;
+    color: var(--color-muted);
+    font-size: 1rem;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    cursor: pointer;
+  }
+
+  .disclosure {
+    margin: 24px 0 0;
+    text-align: center;
   }
 
   .debug {
     display: grid;
     grid-template-columns: auto 1fr;
     gap: 0.1rem 0.75rem;
-    margin: 0;
+    margin: 32px 0 0;
     padding: 0.75rem;
-    border: 2px dashed #555555;
-    border-radius: 8px;
+    border: 2px dashed var(--color-line);
+    border-radius: 12px;
     font: 14px/1.4 ui-monospace, monospace;
+    color: var(--color-muted);
   }
 
   .debug dd {

@@ -1,56 +1,57 @@
 <!--
-  Baseline enrollment. A healthy recording used later to compare a loved one against their own
-  normal face/arm movement. This screen explains the feature and keeps the 911 control present
-  (+layout.svelte). Nothing is uploaded; recordings stay on the device (.kiro/steering/safety.md §4).
+  Baseline enrollment. A short recording on a typical day, used later to compare a loved one
+  against their own usual face/arm movement. It never implies the person is well; it is only a
+  comparison reference. The 911 control stays present (+layout.svelte). Nothing is uploaded;
+  recordings stay on the device (.kiro/steering/safety.md §4).
 -->
 <script lang="ts">
   import { onMount } from 'svelte';
   import { t } from '#lib/i18n/index.ts';
+  import FaceGuide from '#lib/components/FaceGuide.svelte';
   import { locale } from '#lib/stores/session.ts';
   import { speak } from '#lib/voice.ts';
 
   onMount(() => speak(t($locale, 'baseline.voice'), $locale));
 </script>
 
-<div class="baseline">
-  <header>
+<div class="split baseline">
+  <section>
     <h1>{t($locale, 'baseline.title')}</h1>
-  </header>
+    <p class="sub">{t($locale, 'baseline.intro')}</p>
+    <p class="note">{t($locale, 'baseline.note')}</p>
 
-  <p class="intro">{t($locale, 'baseline.intro')}</p>
-  <p class="note">{t($locale, 'baseline.note')}</p>
+    <div class="actions between">
+      <a class="btn btn-outline" href="/">{t($locale, 'check.common.back')}</a>
+      <a class="btn btn-primary" href="/check/face">
+        {t($locale, 'baseline.start')}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M5 12h14M13 6l6 6-6 6" />
+        </svg>
+      </a>
+    </div>
+  </section>
 
-  <nav class="actions">
-    <a class="button primary" href="/check/face">{t($locale, 'baseline.start')}</a>
-    <a class="button secondary" href="/">{t($locale, 'baseline.back')}</a>
-  </nav>
+  <div class="panel illustration" aria-hidden="true">
+    <FaceGuide />
+  </div>
 </div>
 
 <style>
-  .baseline {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    min-height: calc(100dvh - var(--tap-min) - 2rem);
-  }
-
-  h1 {
-    margin: 0;
-  }
-
-  .intro,
   .note {
-    margin: 0;
+    margin: 20px 0 0;
+    color: var(--color-accent);
   }
 
-  .note {
-    font-weight: 700;
-  }
-
-  .actions {
+  .illustration {
     display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin-top: auto;
+    align-items: center;
+    justify-content: center;
+    height: 460px;
+  }
+
+  @media (max-width: 900px) {
+    .illustration {
+      display: none;
+    }
   }
 </style>
