@@ -28,7 +28,8 @@
       "checking": "Checking…",
       "complete": "Check complete",
       "skip": "Skip this check",
-      "next": "Next"
+      "next": "Next",
+      "step": "Step {n} of {total}"
     },
     "coach": {
       "moveCloser": "Move closer",

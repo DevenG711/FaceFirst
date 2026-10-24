@@ -11,6 +11,7 @@
   import { speechErrorScore } from '#lib/metrics/speech.ts';
   import { locale, setCaregiverReport, setCheck, unavailableCheck } from '#lib/stores/session.ts';
   import { speak, VOICE_LANG } from '#lib/voice.ts';
+  import FlowProgress from '#lib/components/FlowProgress.svelte';
 
   const NEXT = '/check/befast';
   const JUDGMENTS = ['slurred', 'noChange', 'notSure'] as const;
@@ -106,6 +107,7 @@
 </script>
 
 <div class="check">
+  <FlowProgress locale={$locale} step={3} />
   <h1>{t($locale, 'check.speech.title')}</h1>
   <p class="instructions">{t($locale, 'check.speech.instructions')}</p>
   <p class="phrase" lang={$locale}>{t($locale, 'check.speech.phrase')}</p>

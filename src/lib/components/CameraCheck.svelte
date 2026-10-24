@@ -9,17 +9,21 @@
   import CameraView from '#lib/components/CameraView.svelte';
   import { locale, setCheck, unavailableCheck } from '#lib/stores/session.ts';
   import { speak } from '#lib/voice.ts';
+  import FlowProgress from '#lib/components/FlowProgress.svelte';
   import type { CheckResult } from '#lib/triage/types.ts';
 
   let {
     id,
     next,
     duration,
+    step,
   }: {
     id: 'face' | 'arm';
     /** Route to go to once the check is done or skipped. */
     next: string;
     duration?: number;
+    /** 1-based position in the 4-step check flow. */
+    step: number;
   } = $props();
 
   // Arm drift needs a longer hold than the face check (QUALITY.MIN_ARM_FRAMES is higher).
@@ -50,6 +54,7 @@
 </script>
 
 <div class="check">
+  <FlowProgress locale={$locale} {step} />
   <h1>{t($locale, `check.${id}.title`)}</h1>
   <p class="instructions">{t($locale, `check.${id}.instructions`)}</p>
 
