@@ -96,7 +96,9 @@
 
   h1 {
     margin: 0;
-    font-size: 1.75rem;
+    font-size: 48px; /* design.md: result headline >= 48px, bold */
+    line-height: 1.1;
+    font-weight: 800;
   }
 
   h2 {
@@ -108,7 +110,12 @@
   .action,
   .onset p {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 1.25rem;
+    line-height: 1.5;
+  }
+
+  .action {
+    font-weight: 700;
   }
 
   .onset {
