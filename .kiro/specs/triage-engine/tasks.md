@@ -5,31 +5,31 @@
   - Configure Vitest to include `tests/**/*.test.ts`.
   - _Requirements: 1.1_
 
-- [x] 2. Define types and thresholds
-  - [x] 2.1 Create `src/lib/triage/types.ts` with `TriageInput`, `TriageResult`, `URGENCY`, literal `show911: true`, and `colorToken: 'act' | 'caution'`.
+- [ ] 2. Define types and thresholds
+  - [ ] 2.1 Create `src/lib/triage/types.ts` with `TriageInput`, `TriageResult`, `URGENCY`, literal `show911: true`, and `colorToken: 'act' | 'caution'`.
     - _Requirements: 1.1, 7.5, 7.6_
-  - [x] 2.2 Create `src/lib/triage/thresholds.ts` with `POPULATION_THRESHOLD` and `BASELINE_DEVIATION_THRESHOLD`, each documented as an uncalibrated research placeholder.
+  - [ ] 2.2 Create `src/lib/triage/thresholds.ts` with `POPULATION_THRESHOLD` and `BASELINE_DEVIATION_THRESHOLD`, each documented as an uncalibrated research placeholder.
     - _Requirements: 6.1, 6.2_
 
-- [x] 3. Implement the engine
-  - [x] 3.1 Implement `isFlagged()` (population OR baseline deviation) in `src/lib/triage/engine.ts`.
+- [ ] 3. Implement the engine
+  - [ ] 3.1 Implement `isFlagged()` (population OR baseline deviation) in `src/lib/triage/engine.ts`.
     - _Requirements: 5.1, 5.2, 5.3_
-  - [x] 3.2 Implement `triage()`: collect reasons, then CALL_911_NOW → RETRY_CAPTURE → CANNOT_RULE_OUT; populate `retryChecks`, `baselineComparisons`, `colorToken`.
+  - [ ] 3.2 Implement `triage()`: collect reasons, then CALL_911_NOW → RETRY_CAPTURE → CANNOT_RULE_OUT; populate `retryChecks`, `baselineComparisons`, `colorToken`.
     - _Requirements: 1.1–1.4, 2.1–2.5, 4.1, 4.2, 4.4, 5.4_
-  - [x] 3.3 Confirm no numeric threshold literals in `engine.ts`.
+  - [ ] 3.3 Confirm no numeric threshold literals in `engine.ts`.
     - _Requirements: 6.3_
 
-- [x] 4. Property-based tests for the engine
-  - [x] 4.1 Write arbitraries in `tests/arbitraries.ts` (`arbCheckResult`, `arbTriageInput`).
-  - [x] 4.2 P1–P2: closed output set, show911, color mapping, totality, determinism.
+- [ ] 4. Property-based tests for the engine
+  - [ ] 4.1 Write arbitraries in `tests/arbitraries.ts` (`arbCheckResult`, `arbTriageInput`).
+  - [ ] 4.2 P1–P2: closed output set, show911, color mapping, totality, determinism.
     - _Requirements: 1.1–1.4, 7.5, 7.6_
-  - [x] 4.3 P3, P9: escalation on any finding; CANNOT_RULE_OUT only when nothing found and nothing poor-quality.
+  - [ ] 4.3 P3, P9: escalation on any finding; CANNOT_RULE_OUT only when nothing found and nothing poor-quality.
     - _Requirements: 2.1–2.5_
-  - [x] 4.4 P4–P5: monotonicity on findings and on scores.
+  - [ ] 4.4 P4–P5: monotonicity on findings and on scores.
     - _Requirements: 3.1, 3.2_
-  - [x] 4.5 P6–P7: poor quality never less urgent; RETRY_CAPTURE lists the right checks.
+  - [ ] 4.5 P6–P7: poor quality never less urgent; RETRY_CAPTURE lists the right checks.
     - _Requirements: 4.1, 4.3, 4.4_
-  - [x] 4.6 P8: adding a baseline never lowers urgency.
+  - [ ] 4.6 P8: adding a baseline never lowers urgency.
     - _Requirements: 5.3_
 
 - [ ] 5. Result copy
