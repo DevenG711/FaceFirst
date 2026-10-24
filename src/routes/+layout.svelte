@@ -7,7 +7,8 @@
   import { onMount } from 'svelte';
   import type { Snippet } from 'svelte';
   import Call911Button from '#lib/components/Call911Button.svelte';
-  import { locale } from '#lib/stores/session.ts';
+  import { locale, savedBaseline } from '#lib/stores/session.ts';
+  import { loadBaseline } from '#lib/storage/baselines.ts';
 
   let { children }: { children: Snippet } = $props();
 
@@ -18,6 +19,11 @@
   // DEV-ONLY: expose window.facefirst for console-driven testing. Guarded by import.meta.env.DEV so
   // it is tree-shaken out of production builds and never ships. Does not affect the 911 control or
   // any rendered element — it only attaches a console helper.
+  // Load the personal baseline (local IndexedDB) once, so the result screen can compare against it.
+  onMount(() => {
+    loadBaseline().then((b) => savedBaseline.set(b));
+  });
+
   onMount(async () => {
     if (import.meta.env.DEV) {
       const { installTestHarness } = await import('#lib/dev/testHarness.ts');

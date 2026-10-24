@@ -12,6 +12,13 @@ export interface CheckResult {
   score: number | null;
   /** Side with weaker movement, if determinable. */
   side: Side | null;
+  /**
+   * Optional SIGNED asymmetry in anatomical terms: positive = the person's LEFT side is weaker,
+   * negative = RIGHT side weaker, |signed| === score. Only face and arm produce it. It lets a baseline
+   * comparison see a change of side (e.g. usually a little lower on the left, now drooping on the
+   * right), which comparing unsigned scores alone would miss.
+   */
+  signed?: number;
 }
 
 export type BeFastQuestion = 'balance' | 'vision' | 'headache' | 'numbness';
@@ -24,6 +31,12 @@ export interface TriageInput {
   beFast: Partial<Record<BeFastQuestion, Answer>>;
   caregiverReports: CaregiverReport[];
   baseline: Partial<Record<CheckId, number>> | null;
+  /**
+   * Optional signed baseline values (same convention as CheckResult.signed). When both the check and
+   * the baseline carry a signed value, the deviation is also measured as |signed − baselineSigned|,
+   * so a change of side is caught. This can only ADD sensitivity, never remove a flag.
+   */
+  baselineSigned?: Partial<Record<CheckId, number>> | null;
 }
 
 /** Exactly three outputs. There is no "pass" state and none may be added (safety.md §1). */
@@ -38,7 +51,11 @@ export interface BaselineComparison {
   check: CheckId;
   baseline: number;
   current: number;
+  /** The larger of (current − baseline) and, when signed values exist, |signed − baselineSigned|. */
   deviation: number;
+  /** Present only when both signed values were available. */
+  signedBaseline?: number;
+  signedCurrent?: number;
 }
 
 export interface TriageResult {

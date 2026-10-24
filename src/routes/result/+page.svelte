@@ -11,16 +11,27 @@
   import { triage } from '#lib/triage/engine.ts';
   import { resultCopy } from '#lib/triage/copy.ts';
   import type { CheckId, TriageResult } from '#lib/triage/types.ts';
-  import { locale, checks, beFast, caregiverReports, symptomOnset } from '#lib/stores/session.ts';
+  import {
+    locale,
+    checks,
+    beFast,
+    caregiverReports,
+    symptomOnset,
+    savedBaseline,
+    useBaseline,
+  } from '#lib/stores/session.ts';
+  import { toTriageBaseline } from '#lib/storage/baselines.ts';
   import { speak } from '#lib/voice.ts';
 
-  // Baseline comparison is not recorded in this flow yet.
+  // The personal baseline (if one is saved and the home toggle is on) can only ADD sensitivity:
+  // the engine applies the population thresholds first, then the person's own baseline.
+  const baselineInUse = $derived($useBaseline && $savedBaseline ? $savedBaseline : null);
   const result = $derived(
     triage({
       checks: $checks,
       beFast: $beFast,
       caregiverReports: $caregiverReports,
-      baseline: null,
+      ...toTriageBaseline(baselineInUse),
     })
   );
   const copy = $derived(resultCopy(result, $locale));
@@ -35,9 +46,10 @@
   });
 
   /** One row per check in the flow: face, arms, voice. */
-  type Tag = 'flagged' | 'retry' | 'notChecked' | 'notFlagged';
+  type Tag = 'flagged' | 'changed' | 'retry' | 'notChecked' | 'notFlagged';
   function tagFor(id: CheckId, r: TriageResult): Tag {
-    if (r.reasons.some((x) => x.kind === 'check_flagged' && x.check === id)) return 'flagged';
+    const flag = r.reasons.find((x) => x.kind === 'check_flagged' && x.check === id);
+    if (flag && flag.kind === 'check_flagged') return flag.basis === 'baseline' ? 'changed' : 'flagged';
     const status = $checks[id].status;
     if (status === 'poor_quality' || (status === 'ok' && $checks[id].score === null)) return 'retry';
     if (status === 'unavailable') return 'notChecked';
@@ -50,6 +62,7 @@
   const clock = (ms: number) =>
     new Intl.DateTimeFormat($locale, { hour: 'numeric', minute: '2-digit' }).format(new Date(ms));
   const checkedAt = Date.now();
+  const day = (ms: number) => new Intl.DateTimeFormat($locale, { dateStyle: 'medium' }).format(new Date(ms));
 </script>
 
 <div class="split result">
@@ -108,6 +121,9 @@
         <span class="tag {row.tag}">{t($locale, `result.tag.${row.tag}`)}</span>
       </div>
     {/each}
+    {#if baselineInUse && result.baselineComparisons.length > 0}
+      <p class="small note">{t($locale, 'result.baselineCompared', { date: day(baselineInUse.recordedAt) })}</p>
+    {/if}
     <p class="small note">{t($locale, 'result.notDiagnosis')}</p>
     <a href="/" class="btn btn-outline btn-small close">{t($locale, 'result.close')}</a>
   </section>
@@ -174,7 +190,8 @@
     white-space: nowrap;
   }
 
-  .tag.flagged {
+  .tag.flagged,
+  .tag.changed {
     background: var(--color-act-bg);
     color: var(--color-act-soft);
   }

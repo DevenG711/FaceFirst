@@ -54,6 +54,12 @@ const STATE_COPY: Record<
 function reasonLabel(r: Reason, locale: Locale): string {
   switch (r.kind) {
     case 'check_flagged':
+      // A baseline flag says what changed compared with the person's own usual reading.
+      if (r.basis === 'baseline') {
+        return r.side && r.check !== 'speech'
+          ? t(locale, `result.reason.baselineSided.${r.check}`, { side: t(locale, `result.side.${r.side}`) })
+          : t(locale, `result.reason.baseline.${r.check}`);
+      }
       return r.side && r.check !== 'speech'
         ? t(locale, `result.reason.checkSided.${r.check}`, { side: t(locale, `result.side.${r.side}`) })
         : t(locale, `result.reason.check.${r.check}`);

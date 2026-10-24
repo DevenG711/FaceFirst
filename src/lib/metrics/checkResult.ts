@@ -1,12 +1,9 @@
 // Small constructors so every metric builds CheckResults the same way (score only when ok).
 import type { CheckId, CheckResult, Side } from '../triage/types.ts';
 
-export const okResult = (id: CheckId, score: number, side: Side | null): CheckResult => ({
-  id,
-  status: 'ok',
-  score,
-  side,
-});
+/** `signed` (anatomical, positive = left weaker) is only included when given, for face and arm. */
+export const okResult = (id: CheckId, score: number, side: Side | null, signed?: number): CheckResult =>
+  signed === undefined ? { id, status: 'ok', score, side } : { id, status: 'ok', score, side, signed };
 
 /** The capture ran but was not good enough to score. The engine turns this into RETRY_CAPTURE. */
 export const poorQuality = (id: CheckId): CheckResult => ({ id, status: 'poor_quality', score: null, side: null });

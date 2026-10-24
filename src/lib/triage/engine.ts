@@ -16,12 +16,41 @@ import {
 } from './types.ts';
 
 type Baseline = TriageInput['baseline'];
+type BaselineSigned = TriageInput['baselineSigned'];
 
 /** A usable score: status ok with a real number. Anything else is not scorable. */
 function scoreOf(check: CheckResult): number | null {
   return check.status === 'ok' && typeof check.score === 'number' && !Number.isNaN(check.score)
     ? check.score
     : null;
+}
+
+const isNum = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
+
+/** Signed change from the person's own baseline (positive = left side got relatively weaker), or null. */
+function signedDelta(check: CheckResult, baselineSigned: BaselineSigned): number | null {
+  if (scoreOf(check) === null) return null;
+  const now = check.signed;
+  const base = baselineSigned?.[check.id];
+  return isNum(now) && isNum(base) ? now - base : null;
+}
+
+/**
+ * Deviation from the person's baseline, or null if there is nothing to compare. Two views, and the
+ * LARGER wins so a baseline can only add sensitivity:
+ * - unsigned: score − baseline score (the asymmetry grew);
+ * - signed:   |signed − baseline signed| (the asymmetry grew OR moved to the other side).
+ */
+function deviationOf(check: CheckResult, baseline: Baseline, baselineSigned: BaselineSigned): number | null {
+  const score = scoreOf(check);
+  if (score === null) return null;
+  const base = baseline?.[check.id];
+  const unsigned = isNum(base) ? score - base : null;
+  const delta = signedDelta(check, baselineSigned);
+  const signed = delta === null ? null : Math.abs(delta);
+  if (unsigned === null) return signed;
+  if (signed === null) return unsigned;
+  return Math.max(unsigned, signed);
 }
 
 /**
@@ -33,19 +62,35 @@ function needsRetry(check: CheckResult): boolean {
 }
 
 /** Why a check is flagged, or null. Population takes precedence when both apply. */
-function flagBasis(check: CheckResult, baseline: Baseline): 'population' | 'baseline' | null {
+function flagBasis(
+  check: CheckResult,
+  baseline: Baseline,
+  baselineSigned: BaselineSigned = null
+): 'population' | 'baseline' | null {
   const score = scoreOf(check);
   if (score === null) return null;
   if (score > POPULATION_THRESHOLD[check.id]) return 'population';
   // A baseline can only add sensitivity: it never removes a population flag (Req 5.3).
-  const base = baseline?.[check.id];
-  if (base !== undefined && score - base > BASELINE_DEVIATION_THRESHOLD[check.id]) return 'baseline';
+  const deviation = deviationOf(check, baseline, baselineSigned);
+  if (deviation !== null && deviation > BASELINE_DEVIATION_THRESHOLD[check.id]) return 'baseline';
   return null;
 }
 
 /** Flags on the population threshold OR the baseline deviation, if a baseline exists for the check. */
-export function isFlagged(check: CheckResult, baseline: Baseline): boolean {
-  return flagBasis(check, baseline) !== null;
+export function isFlagged(check: CheckResult, baseline: Baseline, baselineSigned: BaselineSigned = null): boolean {
+  return flagBasis(check, baseline, baselineSigned) !== null;
+}
+
+/**
+ * Side to report for a flag. For a baseline flag driven by the signed change, it is the side that got
+ * weaker RELATIVE TO THEIR USUAL FACE/ARMS (which can differ from the currently lower side, e.g. a
+ * person whose left is usually lower whose right side now drops to meet it). Otherwise the check's side.
+ */
+function flagSide(check: CheckResult, basis: 'population' | 'baseline', baselineSigned: BaselineSigned) {
+  if (basis !== 'baseline') return check.side;
+  const delta = signedDelta(check, baselineSigned);
+  if (delta === null || Math.abs(delta) <= BASELINE_DEVIATION_THRESHOLD[check.id]) return check.side;
+  return delta > 0 ? 'left' : 'right';
 }
 
 const COLOR: Record<TriageState, TriageResult['colorToken']> = {
@@ -61,14 +106,21 @@ export function triage(input: TriageInput): TriageResult {
 
   for (const id of CHECK_IDS) {
     const check = input.checks[id];
-    const basis = flagBasis(check, input.baseline);
-    if (basis) reasons.push({ kind: 'check_flagged', check: id, side: check.side, basis });
+    const signedBase = input.baselineSigned ?? null;
+    const basis = flagBasis(check, input.baseline, signedBase);
+    if (basis) reasons.push({ kind: 'check_flagged', check: id, side: flagSide(check, basis, signedBase), basis });
     if (needsRetry(check)) retry.push(id);
 
     const score = scoreOf(check);
     const base = input.baseline?.[id];
-    if (score !== null && base !== undefined) {
-      baselineComparisons.push({ check: id, baseline: base, current: score, deviation: score - base });
+    const deviation = deviationOf(check, input.baseline, signedBase);
+    if (score !== null && isNum(base) && deviation !== null) {
+      const comparison: BaselineComparison = { check: id, baseline: base, current: score, deviation };
+      if (signedDelta(check, signedBase) !== null) {
+        comparison.signedBaseline = signedBase![id]!;
+        comparison.signedCurrent = check.signed!;
+      }
+      baselineComparisons.push(comparison);
     }
   }
 

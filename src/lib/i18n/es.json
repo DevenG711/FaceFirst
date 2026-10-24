@@ -25,7 +25,8 @@
     "headline": "Una revisión rápida de derrame cerebral.",
     "headlineEm": "Cerca de un minuto.",
     "sub": "Usa su cámara y su micrófono.",
-    "optional": "Opcional"
+    "optional": "Opcional",
+    "useBaseline": "Comparar con la referencia guardada del {date}"
   },
   "check": {
     "common": {
@@ -157,6 +158,15 @@
         "face_uneven": "alguien informa que el rostro está desigual",
         "arm_weak": "alguien informa que el brazo está débil",
         "speech_wrong": "alguien informa que el habla no es clara"
+      },
+      "baseline": {
+        "face": "movimiento de la cara distinto a su referencia",
+        "arm": "caída del brazo distinta a su referencia",
+        "speech": "habla distinta a su referencia"
+      },
+      "baselineSided": {
+        "face": "el lado {side} de la cara se mueve menos que en su referencia",
+        "arm": "el brazo {side} cae más que en su referencia"
       }
     },
     "status": {
@@ -173,7 +183,8 @@
       "flagged": "Marcado",
       "notFlagged": "No marcado",
       "retry": "Repetir",
-      "notChecked": "No revisado"
+      "notChecked": "No revisado",
+      "changed": "Cambió desde la referencia"
     },
     "timeNoticed": "Hora en que lo notó",
     "checkedAt": "Revisado a las",
@@ -181,7 +192,8 @@
     "checkAgain": "Revisar de nuevo",
     "moreQuestions": "Responder algunas preguntas",
     "retryCheck": "Repetir: {check}",
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "baselineCompared": "Comparado con su referencia del {date}."
   },
   "baseline": {
     "title": "Grabar una referencia",
@@ -189,6 +201,33 @@
     "note": "No se sube nada. La grabación permanece en este dispositivo.",
     "start": "Comenzar a grabar",
     "back": "Volver al inicio",
-    "voice": "Grabe un video corto en un día cualquiera. Se queda en este dispositivo y nunca se sube."
+    "voice": "Grabe un video corto en un día cualquiera. Se queda en este dispositivo y nunca se sube.",
+    "warning": "Grabar una referencia no es una revisión de derrame cerebral. Si nota síntomas repentinos, llame al 911 ahora.",
+    "existing": "Hay una referencia del {date} guardada en este dispositivo.",
+    "existingParts": "Guardado: {parts}.",
+    "part": {
+      "face": "cara",
+      "arm": "brazos"
+    },
+    "recordAgain": "Grabar de nuevo",
+    "delete": "Borrar referencia",
+    "deleted": "La referencia se borró de este dispositivo.",
+    "retry": {
+      "face": "No pudimos grabar bien la cara. Mire a la cámara con buena luz e intente de nuevo.",
+      "arm": "No pudimos grabar bien los brazos. Aléjese para que quepan los dos brazos e intente de nuevo."
+    },
+    "tryAgain": "Intentar de nuevo",
+    "skipArm": "Guardar sin brazos",
+    "saving": "Guardando…",
+    "saveFailed": "No se pudo guardar la referencia en este dispositivo. Intente de nuevo.",
+    "saved": {
+      "title": "Referencia guardada",
+      "titleEm": "en este dispositivo.",
+      "body": "Desde ahora, las revisiones en este dispositivo se comparan con esta grabación y también con los límites habituales. Puede grabar una nueva cuando quiera.",
+      "voice": "Referencia guardada en este dispositivo."
+    },
+    "home": "Volver al inicio",
+    "startCheck": "Comenzar la revisión",
+    "optional": "Esto es opcional. Una revisión funciona sin referencia, y puede borrarla cuando quiera."
   }
 }

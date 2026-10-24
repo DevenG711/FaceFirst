@@ -15,6 +15,7 @@ import {
   BLENDSHAPE_LEFT_IS_SIDE,
   faceFrame,
   normalizePoint,
+  toAnatomicalSigned,
   type Point,
 } from './geometry.ts';
 
@@ -150,5 +151,6 @@ export function faceAsymmetry(
     }
   }
   const side = m > 0 ? anatomicalSideOfA(mirrored) : m < 0 ? anatomicalSideOfB(mirrored) : null;
-  return okResult('face', Math.abs(m), side);
+  // `signed` keeps the direction so a personal baseline can catch a change of side (lib/triage/engine.ts).
+  return okResult('face', Math.abs(m), side, toAnatomicalSigned(m, mirrored));
 }

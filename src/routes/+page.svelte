@@ -9,9 +9,13 @@
   import {
     locale,
     symptomOnset,
+    savedBaseline,
+    useBaseline,
     SYMPTOM_ONSET_OPTIONS,
     type SymptomOnset,
   } from '#lib/stores/session.ts';
+
+  const day = (ms: number) => new Intl.DateTimeFormat($locale, { dateStyle: 'medium' }).format(new Date(ms));
   import { speak } from '#lib/voice.ts';
 
   const welcome = (l: Locale) => speak(t(l, 'home.voice.welcome'), l);
@@ -71,7 +75,19 @@
       {/each}
     </fieldset>
 
-    <a href="/baseline" class="btn btn-outline btn-small baseline">{t($locale, 'home.baseline')}</a>
+    {#if $savedBaseline}
+      <!-- Only shown when a baseline exists. Turning it off just drops the extra comparison;
+           the usual limits always apply, and the 911 control is unaffected. -->
+      <label class="chip toggle">
+        <input type="checkbox" bind:checked={$useBaseline} />
+        <span class="box" aria-hidden="true"></span>
+        <span>{t($locale, 'home.useBaseline', { date: day($savedBaseline.recordedAt) })}</span>
+      </label>
+    {/if}
+
+    <a href="/baseline" class="btn btn-outline btn-small baseline">
+      {t($locale, 'home.baseline')} <span class="small">· {t($locale, 'home.optional')}</span>
+    </a>
 
     <p class="small disclaimer">{t($locale, 'home.disclaimer')}</p>
   </section>
@@ -139,6 +155,34 @@
 
   .baseline {
     margin-top: 40px;
+  }
+
+  .toggle {
+    display: flex;
+    width: fit-content;
+    gap: 12px;
+    margin-top: 40px;
+    padding-block: 10px;
+    text-align: left;
+  }
+
+  /* Neutral accent box, never green (.kiro/steering/design.md). */
+  .box {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--color-line);
+    border-radius: 6px;
+  }
+
+  .toggle:has(input:checked) .box {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    box-shadow: inset 0 0 0 3px var(--color-bg);
+  }
+
+  .toggle + .baseline {
+    margin-top: 16px;
   }
 
   .disclaimer {

@@ -25,7 +25,8 @@
     "headline": "Uma verificação rápida de AVC.",
     "headlineEm": "Cerca de um minuto.",
     "sub": "Usa sua câmera e seu microfone.",
-    "optional": "Opcional"
+    "optional": "Opcional",
+    "useBaseline": "Comparar com a referência salva de {date}"
   },
   "check": {
     "common": {
@@ -157,6 +158,15 @@
         "face_uneven": "alguém relata rosto desigual",
         "arm_weak": "alguém relata braço fraco",
         "speech_wrong": "alguém relata fala pouco clara"
+      },
+      "baseline": {
+        "face": "movimento do rosto diferente da referência",
+        "arm": "queda do braço diferente da referência",
+        "speech": "fala diferente da referência"
+      },
+      "baselineSided": {
+        "face": "o lado {side} do rosto se mexendo menos do que na referência",
+        "arm": "o braço {side} caindo mais do que na referência"
       }
     },
     "status": {
@@ -173,7 +183,8 @@
       "flagged": "Marcado",
       "notFlagged": "Não marcado",
       "retry": "Repetir",
-      "notChecked": "Não verificado"
+      "notChecked": "Não verificado",
+      "changed": "Mudou desde a referência"
     },
     "timeNoticed": "Hora em que notou",
     "checkedAt": "Verificado às",
@@ -181,7 +192,8 @@
     "checkAgain": "Verificar de novo",
     "moreQuestions": "Responder algumas perguntas",
     "retryCheck": "Repetir: {check}",
-    "close": "Fechar"
+    "close": "Fechar",
+    "baselineCompared": "Comparado com a referência de {date}."
   },
   "baseline": {
     "title": "Gravar uma referência",
@@ -189,6 +201,33 @@
     "note": "Nada é enviado. A gravação permanece neste dispositivo.",
     "start": "Começar a gravar",
     "back": "Voltar ao início",
-    "voice": "Grave um vídeo curto em um dia comum. Ele fica neste aparelho e nunca é enviado."
+    "voice": "Grave um vídeo curto em um dia comum. Ele fica neste aparelho e nunca é enviado.",
+    "warning": "Gravar uma referência não é uma verificação de AVC. Se notar sintomas repentinos, ligue para o 911 agora.",
+    "existing": "Há uma referência de {date} salva neste aparelho.",
+    "existingParts": "Salvo: {parts}.",
+    "part": {
+      "face": "rosto",
+      "arm": "braços"
+    },
+    "recordAgain": "Gravar de novo",
+    "delete": "Apagar referência",
+    "deleted": "A referência foi apagada deste aparelho.",
+    "retry": {
+      "face": "Não conseguimos gravar bem o rosto. Olhe para a câmera com boa luz e tente de novo.",
+      "arm": "Não conseguimos gravar bem os braços. Afaste-se para que os dois braços apareçam e tente de novo."
+    },
+    "tryAgain": "Tentar de novo",
+    "skipArm": "Salvar sem os braços",
+    "saving": "Salvando…",
+    "saveFailed": "Não foi possível salvar a referência neste aparelho. Tente de novo.",
+    "saved": {
+      "title": "Referência salva",
+      "titleEm": "neste aparelho.",
+      "body": "A partir de agora, as verificações neste aparelho comparam com esta gravação e também com os limites habituais. Grave uma nova quando quiser.",
+      "voice": "Referência salva neste aparelho."
+    },
+    "home": "Voltar ao início",
+    "startCheck": "Começar a verificação",
+    "optional": "Isto é opcional. Uma verificação funciona sem referência, e você pode apagá-la quando quiser."
   }
 }

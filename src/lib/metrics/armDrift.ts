@@ -9,7 +9,14 @@
 import { METRIC_PARAMS, QUALITY } from '../triage/thresholds.ts';
 import type { CheckResult } from '../triage/types.ts';
 import { median, okResult, poorQuality } from './checkResult.ts';
-import { anatomicalSideOfA, anatomicalSideOfB, normalizePoint, poseFrame, type Point } from './geometry.ts';
+import {
+  anatomicalSideOfA,
+  anatomicalSideOfB,
+  normalizePoint,
+  poseFrame,
+  toAnatomicalSigned,
+  type Point,
+} from './geometry.ts';
 
 /** A pose landmark in PIXEL coordinates. `visibility` is MediaPipe's 0–1 value, if available. */
 export interface PoseLandmark extends Point {
@@ -95,5 +102,5 @@ export function armDrift(frames: readonly (ArmFrameInput | null)[], { mirrored }
   const k = Math.max(1, Math.min(Math.floor(n * METRIC_PARAMS.ARM_WINDOW_FRACTION), Math.floor(n / 2)));
   const diff = drop(yA, k) - drop(yB, k);
   const side = diff > 0 ? anatomicalSideOfA(mirrored) : diff < 0 ? anatomicalSideOfB(mirrored) : null;
-  return okResult('arm', Math.abs(diff), side);
+  return okResult('arm', Math.abs(diff), side, toAnatomicalSigned(diff, mirrored));
 }

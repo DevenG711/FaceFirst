@@ -25,7 +25,8 @@
     "headline": "A quick stroke check.",
     "headlineEm": "About one minute.",
     "sub": "Uses your camera and microphone.",
-    "optional": "Optional"
+    "optional": "Optional",
+    "useBaseline": "Compare with the saved baseline from {date}"
   },
   "check": {
     "common": {
@@ -157,6 +158,15 @@
         "face_uneven": "someone reports an uneven face",
         "arm_weak": "someone reports a weak arm",
         "speech_wrong": "someone reports unclear speech"
+      },
+      "baseline": {
+        "face": "face movement that differs from their baseline",
+        "arm": "arm drift that differs from their baseline",
+        "speech": "speech that differs from their baseline"
+      },
+      "baselineSided": {
+        "face": "the {side} side of the face moving less than in their baseline",
+        "arm": "the {side} arm drifting more than in their baseline"
       }
     },
     "status": {
@@ -173,7 +183,8 @@
       "flagged": "Flagged",
       "notFlagged": "Not flagged",
       "retry": "Retry",
-      "notChecked": "Not checked"
+      "notChecked": "Not checked",
+      "changed": "Changed from baseline"
     },
     "timeNoticed": "Time noticed",
     "checkedAt": "Checked at",
@@ -181,7 +192,8 @@
     "checkAgain": "Check again",
     "moreQuestions": "Answer a few questions",
     "retryCheck": "Retry {check}",
-    "close": "Close"
+    "close": "Close",
+    "baselineCompared": "Compared with their baseline from {date}."
   },
   "baseline": {
     "title": "Record a baseline",
@@ -189,6 +201,33 @@
     "note": "Nothing is uploaded. The recording stays on this device.",
     "start": "Start recording",
     "back": "Back to home",
-    "voice": "Record a short video on a typical day. It stays on this device and is never uploaded."
+    "voice": "Record a short video on a typical day. It stays on this device and is never uploaded.",
+    "warning": "Recording a baseline is not a stroke check. If you notice sudden symptoms, call 911 now.",
+    "existing": "A baseline from {date} is saved on this device.",
+    "existingParts": "Saved: {parts}.",
+    "part": {
+      "face": "face",
+      "arm": "arms"
+    },
+    "recordAgain": "Record again",
+    "delete": "Delete baseline",
+    "deleted": "The baseline was deleted from this device.",
+    "retry": {
+      "face": "We couldn't get a clear face recording. Face the camera in good light and try again.",
+      "arm": "We couldn't get a clear arm recording. Step back so both arms fit, then try again."
+    },
+    "tryAgain": "Try again",
+    "skipArm": "Save without arms",
+    "saving": "Saving…",
+    "saveFailed": "The baseline couldn't be saved on this device. Try again.",
+    "saved": {
+      "title": "Baseline saved",
+      "titleEm": "on this device.",
+      "body": "From now on, checks on this device compare against this recording as well as the usual limits. Record a new one any time.",
+      "voice": "Baseline saved on this device."
+    },
+    "home": "Back to home",
+    "startCheck": "Start check",
+    "optional": "This is optional. A check works without a baseline, and you can delete it any time."
   }
 }

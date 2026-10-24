@@ -127,6 +127,17 @@ export function anatomicalSideOfB(mirrored: boolean): Side {
 }
 
 /**
+ * Converts a signed "side A is weaker" value (positive = A weaker, negative = B weaker) into the
+ * anatomical convention used by CheckResult.signed and baselines: positive = the person's LEFT is
+ * weaker. Magnitude is unchanged, so |result| === |aMinusB|.
+ */
+export function toAnatomicalSigned(aMinusB: number, mirrored: boolean): number {
+  // Written as a branch, not a multiply, so -0 never appears for a symmetric reading.
+  if (aMinusB === 0) return 0;
+  return anatomicalSideOfA(mirrored) === 'left' ? aMinusB : -aMinusB;
+}
+
+/**
  * Which side the MediaPipe blendshape suffix "Left" (mouthSmileLeft, eyeBlinkLeft, …) refers to.
  * Blendshapes are computed from the same landmarks, whose "left" is the model's left, i.e. the side of
  * 263 / 291 (side B). VERIFY LIVE: smile on one side only, unmirrored, and confirm `mouthSmileLeft` rises

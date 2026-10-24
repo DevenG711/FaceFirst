@@ -18,6 +18,9 @@
     back = '/',
     duration,
     step,
+    oncapture,
+    onskip,
+    onback,
   }: {
     id: 'face' | 'arm';
     /** Route to go to once the check is done or skipped. */
@@ -27,6 +30,15 @@
     duration?: number;
     /** 1-based position in the check flow; omit for a check outside the main flow. */
     step?: number;
+    /**
+     * Baseline enrollment: receive the measured result instead of storing it as this session's check
+     * and navigating to `next`. The session check results are left untouched.
+     */
+    oncapture?: (result: CheckResult) => void;
+    /** Replaces the default skip (record `unavailable` and go to `next`). */
+    onskip?: () => void;
+    /** Replaces the Back link with a button (for multi-step screens on one route). */
+    onback?: () => void;
   } = $props();
 
   // Arm drift needs a longer hold than the face check (QUALITY.MIN_ARM_FRAMES is higher).
@@ -68,8 +80,12 @@
     // Store the measured score and side from the vision layer. A poor_quality or unavailable
     // result flows straight into the engine, which can only make the outcome MORE cautious.
     if (import.meta.env.DEV) logMeasured(result);
-    setCheck(result);
     phase = 'done';
+    if (oncapture) {
+      setTimeout(() => oncapture(result), 1000);
+      return;
+    }
+    setCheck(result);
     setTimeout(() => goto(next), 1000);
   }
 
@@ -102,6 +118,8 @@
         check: result.id,
         status: result.status,
         score: result.score,
+        signed: result.signed ?? null, // anatomical: + = left weaker, − = right weaker
+        baselineCapture: Boolean(oncapture),
         measures,
         side: result.side,
         reading: read,
@@ -112,6 +130,7 @@
   }
 
   function skip() {
+    if (onskip) return onskip();
     setCheck(unavailableCheck(id));
     goto(next);
   }
@@ -145,7 +164,11 @@
 </p>
 
 <div class="actions between">
-  <a href={back} class="btn btn-outline">{t($locale, 'check.common.back')}</a>
+  {#if onback}
+    <button type="button" class="btn btn-outline" onclick={onback}>{t($locale, 'check.common.back')}</button>
+  {:else}
+    <a href={back} class="btn btn-outline">{t($locale, 'check.common.back')}</a>
+  {/if}
   {#if phase === 'ready'}
     <button type="button" class="btn btn-primary" onclick={begin}>
       {t($locale, `check.${id}.start`)}

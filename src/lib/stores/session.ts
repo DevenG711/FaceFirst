@@ -1,7 +1,9 @@
 // Session state shared across the check flow (home → checks → result → EMS card).
-// In memory only: nothing here is saved or sent anywhere (.kiro/steering/safety.md §4).
+// In memory only: nothing here is saved or sent anywhere (.kiro/steering/safety.md §4). The one
+// exception is the personal baseline, which lib/storage/baselines.ts keeps in local IndexedDB.
 import { writable } from 'svelte/store';
 import { DEFAULT_LOCALE, type Locale } from '#lib/i18n/index.ts';
+import type { StoredBaseline } from '#lib/storage/baselines.ts';
 import type {
   Answer,
   BeFastQuestion,
@@ -64,6 +66,15 @@ export const beFast = writable<Partial<Record<BeFastQuestion, Answer>>>({});
 export function setBeFastAnswer(question: BeFastQuestion, answer: Answer): void {
   beFast.update((all) => ({ ...all, [question]: answer }));
 }
+
+/**
+ * The personal baseline saved on this device (lib/storage/baselines.ts), loaded once by +layout.svelte.
+ * `undefined` while still loading, `null` when there is none.
+ */
+export const savedBaseline = writable<StoredBaseline | null | undefined>(undefined);
+
+/** Whether this check should compare against the saved baseline (home screen toggle). */
+export const useBaseline = writable<boolean>(true);
 
 export function setCaregiverReport(report: CaregiverReport, observed: boolean): void {
   caregiverReports.update((all) => {
